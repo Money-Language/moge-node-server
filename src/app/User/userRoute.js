@@ -45,3 +45,4 @@ module.exports = function(app){
     app.get('/auth/kakao/callback', passport.authenticate('kakao-login', { failureRedirect: '/auth', successRedirect: '/' }));
 
 };
+

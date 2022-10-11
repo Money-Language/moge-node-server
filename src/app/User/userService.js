@@ -68,6 +68,8 @@ exports.postSignIn = async function (email, password) {
 };
 
 
+
+
 // 카카오 소셜 회원 가입
 exports.createkakaoUser = async function (email, nickname, profileImage, status) {
     try {
