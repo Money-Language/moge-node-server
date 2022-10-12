@@ -68,12 +68,13 @@ exports.postSignIn = async function (email, password) {
 };
 
 
-
-
 // 카카오 소셜 회원 가입
 exports.createkakaoUser = async function (email, nickname, profileImage, status) {
     try {
-
+        // 닉네임 중복 확인
+        const nicknameRows = await userProvider.nicknameCheck(nickname);
+        if (nicknameRows.length > 0) return errResponse(baseResponse.SIGNUP_REDUNDANT_NICKNAME);
+        
         const insertKakaoUserInfoParams = [email, nickname, profileImage, status];
         const connection = await pool.getConnection(async (conn) => conn);
 
@@ -81,15 +82,25 @@ exports.createkakaoUser = async function (email, nickname, profileImage, status)
             connection,
             insertKakaoUserInfoParams,
         );
+
+        const result = {
+            email: email,
+            nickname: nickname,
+            profileImage: profileImage,
+            status: status,
+        };
+
         // const userInfoRows = await userProvider.accountCheck(email);
         // if (userInfoRows[0].status === 'INACTIVE') {
         //     return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
         // } else if (userInfoRows[0].status === 'DELETED') {
         //     return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
         // }
+
         console.log(`카카오 로그인으로 추가된 회원 인덱스 번호 : ${userIdResult[0].insertId}`);
         connection.release();
-        return response(baseResponse.SUCCESS);
+        return response(baseResponse.SUCCESS, result);
+        
     } catch (err) {
         logger.error(`App - createKakaoUser Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);

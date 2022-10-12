@@ -42,6 +42,15 @@ exports.emailCheck = async function (email) {
   return emailCheckResult;
 };
 
+// 닉네임 중복 확인
+exports.nicknameCheck = async function (nickname) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const nicknameCheckResult = await userDao.selectUserNickName(connection, nickname);
+  connection.release();
+
+  return nicknameCheckResult;
+};
+
 // 비밀번호 확인
 exports.passwordCheck = async function (selectUserPasswordParams) {
   const connection = await pool.getConnection(async (conn) => conn);

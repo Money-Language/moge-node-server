@@ -28,7 +28,8 @@ exports.getTest = async function (req, res) {
  * [POST] /app/users/login/kakao
  */
 exports.loginKakao = async function (req, res) {
-    const { accessToken } = req.body;
+    const accessToken = req.body.accessToken;
+    const name = req.body.nickname;
     try {
         let kakao_profile;
         try {
@@ -44,7 +45,7 @@ exports.loginKakao = async function (req, res) {
         }
 
         const email = kakao_profile.data.kakao_account.email;
-        const name = kakao_profile.data.kakao_account.profile.nickname;
+        // const name = kakao_profile.data.kakao_account.profile.nickname;
         const profileUrl = kakao_profile.data.kakao_account.profile.profile_image_url;
         const emailRows = await userProvider.emailCheck(email);
 
@@ -66,19 +67,10 @@ exports.loginKakao = async function (req, res) {
 
         // 이메일이 존재하지 않는 경우 -> 회원가입 처리
         } else {
-            const result = {
-                email: email,
-                nickname: name,
-                profileImage: profileUrl,
-                status: 'KAKAO',
-            };
-            const signUpResponse = await userService.createkakaoUser(
-                result.email,
-                result.nickname,
-                result.profileImage,
-                result.status,
-            );
-            return res.send(response(baseResponse.SUCCESS, result));
+            if(!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
+            const signUpResponse = await userService.createkakaoUser(email, name, profileUrl, 'KAKAO');
+            // return res.send(response(baseResponse.SUCCESS, result));
+            return res.send(signUpResponse);
         }
     } catch (err) {
         logger.error(`App - logInKakao Query error\n: ${JSON.stringify(err)}`);
