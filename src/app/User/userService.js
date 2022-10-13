@@ -68,7 +68,7 @@ exports.postSignIn = async function (email, password) {
 };
 
 
-// 카카오 소셜 회원 가입
+// 소셜 계정 회원 가입
 exports.createkakaoUser = async function (email, nickname, profileImage, status) {
     try {
         // 닉네임 중복 확인

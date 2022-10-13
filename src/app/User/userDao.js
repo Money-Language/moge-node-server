@@ -82,7 +82,7 @@ async function selectUserAccount(connection, email) {
   return selectUserAccountRow[0];
 }
 
-// 카카오 로그인 유저 생성
+// 소셜 로그인 유저 생성
 async function insertKakaoUser(connection, insertUserParams) {
   const insertUserQuery = `
     INSERT INTO User(email, nickname, profileImage, status)
