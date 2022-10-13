@@ -83,7 +83,7 @@ async function selectUserAccount(connection, email) {
 }
 
 // 소셜 로그인 유저 생성
-async function insertKakaoUser(connection, insertUserParams) {
+async function insertSocialUser(connection, insertUserParams) {
   const insertUserQuery = `
     INSERT INTO User(email, nickname, profileImage, status)
     VALUES (?, ?, ?, ?);
@@ -103,5 +103,5 @@ module.exports = {
   insertUserInfo,
   selectUserPassword,
   selectUserAccount,
-  insertKakaoUser
+  insertSocialUser
 };
