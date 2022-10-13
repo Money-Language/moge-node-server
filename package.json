@@ -26,6 +26,7 @@
     "mysql2": "^2.0.0",
     "passport": "^0.6.0",
     "passport-kakao": "^1.0.1",
+    "passport-naver": "^1.0.6",
     "regex-email": "^1.0.2",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.2.1"
