@@ -97,12 +97,12 @@ exports.createSocialUser = async function (email, nickname, profileImage, status
         //     return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
         // }
 
-        console.log(`카카오 로그인으로 추가된 회원 인덱스 번호 : ${userIdResult[0].insertId}`);
+        console.log(`소셜 로그인으로 추가된 회원 인덱스 번호 : ${userIdResult[0].insertId}`);
         connection.release();
         return response(baseResponse.SUCCESS, result);
         
     } catch (err) {
-        logger.error(`App - createKakaoUser Service error\n: ${err.message}`);
+        logger.error(`App - createSocialUser Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);
     }
 };
