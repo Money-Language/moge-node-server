@@ -23,7 +23,7 @@ module.exports = {
     SIGNIN_PASSWORD_EMPTY : { "isSuccess": false, "code": 2011, "message": "비밀번호를 입력 해주세요." },
 
     USER_USERID_EMPTY : { "isSuccess": false, "code": 2012, "message": "userId를 입력해주세요." },
-    USER_USERID_NOT_EXIST : { "isSuccess": false, "code": 2013, "message": "해당 회원이 존재하지 않습니다." },
+    USER_USERID_NOT_EXIST : { "isSuccess": false, "code": 2013, "message": "해당 유저가 존재하지 않습니다." },
 
     USER_USEREMAIL_EMPTY : { "isSuccess": false, "code": 2014, "message": "이메일을 입력해주세요." },
     USER_USEREMAIL_NOT_EXIST : { "isSuccess": false, "code": 2015, "message": "해당 이메일을 가진 회원이 존재하지 않습니다." },
@@ -33,7 +33,8 @@ module.exports = {
     USER_STATUS_EMPTY : { "isSuccess": false, "code": 2018, "message": "회원 상태값을 입력해주세요" },
 
     USER_ACCESS_TOKEN_WRONG : { "isSuccess": false, "code": 2090, "message": "accessToken이 올바르지 않습니다." },
-    USER_INFO_EMPTY : { "isSuccess": false, "code": 2091, "message": "유저 정보가 비어있습니다." },
+    USER_INFO_EMPTY : { "isSuccess": false, "code": 2091, "message": "유저 정보가 비어 있습니다." },
+    USER_BOARD_LIST_EMPTY : { "isSuccess": false, "code": 2092, "message": "해당 유저가 작성한 게시글이 없습니다." },
 
 
 
