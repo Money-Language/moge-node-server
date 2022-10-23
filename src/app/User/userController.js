@@ -11,6 +11,7 @@ const {emit} = require("nodemon");
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 
+
 /**
  * API No. 0
  * API Name : 테스트 API
@@ -128,36 +129,5 @@ exports.loginNaver = async function (req, res) {
     } catch (err) {
         logger.error(`App - logInNaver Query error\n: ${JSON.stringify(err)}`);
         return res.send(errResponse(baseResponse.USER_INFO_EMPTY));
-    }
-};
-
-
-
-
-/**
- * API No. 3
- * API Name : 각 유저가 작성한 게시글(피드) 조회
- * [GET] /app/users/{userIdx}/boards
- */
-exports.getBoardListByIdx = async function (req, res) {
-    /**
-     * Path Variable : userIdx
-     */
-    const userIdx = req.params.userIdx;
-    const userIdxResult = await userProvider.retrieveUserList();
-    const boardResult = await userProvider.viewBoard();
-    const userIdxList = await Promise.all(userIdxResult.map(async(val) => val.userIdx))
-    const boardUserIdxList = await Promise.all(boardResult.map(async(val) => val.userIdx))
-
-    if (!userIdxList.includes(parseInt(userIdx))) {
-        return res.send(errResponse(baseResponse.USER_USERID_NOT_EXIST));
-    } else {
-        if (!boardUserIdxList.includes(parseInt(userIdx))) {
-            return res.send(errResponse(baseResponse.USER_BOARD_LIST_EMPTY));
-        }
-        else {
-            const feedByUserIdx = await userProvider.viewFeedByUserIdx(userIdx);
-            return res.send(response(baseResponse.SUCCESS, feedByUserIdx));
-        }
     }
 };

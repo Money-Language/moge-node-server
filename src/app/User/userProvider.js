@@ -70,19 +70,3 @@ exports.accountCheck = async function (email) {
 
   return userAccountResult;
 };
-
-// 각 사용자가 작성한 게시글(피드) 조회
-exports.viewFeedByUserIdx = async function (userIdx) {
-  const connection = await pool.getConnection(async (conn) => conn);
-  const userFeedResult = await userDao.selectUserFeed(connection, userIdx);
-  connection.release();
-  return userFeedResult;
-};
-
-// 모든 게시글 조회
-exports.viewBoard = async function () {
-  const connection = await pool.getConnection(async (conn) => conn);
-  const userBoardResult = await userDao.selectBoard(connection);
-  connection.release();
-  return userBoardResult;
-};

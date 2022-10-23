@@ -62,7 +62,6 @@ module.exports = function(app){
         done(null, user); 
     });
 
-
     // 0. 테스트 API
     app.get('/app/test', user.getTest)
 
@@ -75,9 +74,6 @@ module.exports = function(app){
     app.post('/app/users/login/naver', user.loginNaver);
     // 2-1. 네이버 Access 토큰 발급 Url
     app.get('/auth/naver/callback', passport.authenticate('naver-login', { failureRedirect: '/auth', successRedirect: '/' }));
-
-    // 3. 각 유저가 작성한 게시글(피드) 조회
-    app.get('/app/users/:userIdx/boards', user.getBoardListByIdx);
 
 };
 

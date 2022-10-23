@@ -92,40 +92,6 @@ async function insertSocialUser(connection, insertUserParams) {
   return insertUserRow;
 }
 
-// 각 유저가 작성한 게시글(피드) 조회
-async function selectUserFeed(connection, userIdx) {
-  const selectUserFeedQuery = `
-                      SELECT a.nickname,
-                              a.profileImage,
-                              CASE
-                                WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) <= 0 THEN '방금 전'
-                                WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) < 60 THEN CONCAT(TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()), '분 전')
-                                WHEN TIMESTAMPDIFF(HOUR, b.createdAt, NOW()) < 24 THEN CONCAT(TIMESTAMPDIFF(HOUR, b.createdAt, NOW()), '시간 전')
-                                WHEN TIMESTAMPDIFF(DAY, b.createdAt, NOW()) < 7 THEN CONCAT(TIMESTAMPDIFF(DAY, b.createdAt, NOW()), '일 전')
-                                WHEN TIMESTAMPDIFF(WEEK, b.createdAt, NOW()) < 5 THEN CONCAT(TIMESTAMPDIFF(WEEK, b.createdAt, NOW()), '주 전')
-                                ELSE CONCAT(TIMESTAMPDIFF(MONTH, b.createdAt, NOW()), '달 전')
-                              END AS 'elapsedTime',
-                              b.title,
-                              COUNT(c.quizIdx) AS 'quizAmount',
-                              b.viewCount
-                      FROM User a
-                      LEFT JOIN Board b on a.userIdx = b.userIdx
-                      LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
-                      WHERE a.userIdx = ?;
-                `;
-  const [userFeedRow] = await connection.query(selectUserFeedQuery, userIdx);
-  return userFeedRow;
-}
-
-// 모든 게시글 조회
-async function selectBoard(connection) {
-  const selectBoardQuery = `
-                  SELECT *
-                  FROM Board;
-                `;
-  const [boardRows] = await connection.query(selectBoardQuery);
-  return boardRows;
-}
 
 module.exports = {
   selectUser,
@@ -135,7 +101,5 @@ module.exports = {
   insertUserInfo,
   selectUserPassword,
   selectUserAccount,
-  insertSocialUser,
-  selectUserFeed,
-  selectBoard
+  insertSocialUser
 };
