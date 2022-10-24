@@ -32,9 +32,15 @@ module.exports = {
 
     USER_STATUS_EMPTY : { "isSuccess": false, "code": 2018, "message": "회원 상태값을 입력해주세요" },
 
-    USER_ACCESS_TOKEN_WRONG : { "isSuccess": false, "code": 2090, "message": "accessToken이 올바르지 않습니다." },
-    USER_INFO_EMPTY : { "isSuccess": false, "code": 2091, "message": "유저 정보가 비어 있습니다." },
-    USER_BOARD_LIST_EMPTY : { "isSuccess": false, "code": 2092, "message": "해당 유저가 작성한 게시글이 없습니다." },
+    USER_ACCESS_TOKEN_WRONG : { "isSuccess": false, "code": 2020, "message": "accessToken이 올바르지 않습니다." },
+    USER_INFO_EMPTY : { "isSuccess": false, "code": 2021, "message": "유저 정보가 비어 있습니다." },
+    USER_BOARD_LIST_EMPTY : { "isSuccess": false, "code": 2022, "message": "해당 유저가 작성한 게시글이 없습니다." },
+
+    CATEGORY_CATEGORY_IDX_NOT_EXIST : { "isSuccess": false, "code": 2023, "message": "해당 카테고리가 존재하지 않습니다." },
+    CATEGORY_LIST_EMPTY : { "isSuccess": false, "code": 2024, "message": "해당 카테고리에 존재하는 퀴즈가 없습니다." },
+
+    BOARD_BOARDIDX_EMPTY : { "isSuccess": false, "code": 2025, "message": "게시글 인덱스가 비어있습니다." },
+
 
 
 
