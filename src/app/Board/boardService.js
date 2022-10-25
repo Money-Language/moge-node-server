@@ -18,7 +18,7 @@ exports.updateCountView = async function (boardIdx) {
         const connection = await pool.getConnection(async (conn) => conn);
         const updateCountViewResult = await boardDao.updateViewCount(connection, boardIdx)
         connection.release();
-        return response(baseResponse.SUCCESS);
+        return response(baseResponse.SUCCESS, updateCountViewResult);
 
     } catch (err) {
         logger.error(`App - updateCountView Service error\n: ${err.message}`);

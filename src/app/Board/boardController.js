@@ -32,7 +32,7 @@ exports.getBoardListByIdx = async function (req, res) {
 
     if(!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     if (userIdFromJWT != userIdx) {
-        return res.send(errResponse(baseResponse.USER_ID_NOT_MATCH));
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
     } else {
         if (!boardUserIdxList.includes(parseInt(userIdx))) {
             return res.send(errResponse(baseResponse.USER_BOARD_LIST_EMPTY));
@@ -67,7 +67,7 @@ exports.increaseViewCount = async function (req, res) {
 
     const boardIdx = req.params.boardIdx;
 
-    if(!boardIdx) return res.send(errResponse(baseResponse.REVIEW_USERIDX_EMPTY));
+    if(!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
     const updateCountView = await boardService.updateCountView(boardIdx);
     return res.send(updateCountView)
 }

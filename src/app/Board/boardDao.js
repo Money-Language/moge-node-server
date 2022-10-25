@@ -3,9 +3,9 @@ async function selectUserFeed(connection, userIdx) {
   const selectUserFeedQuery = `
                     SELECT d.categoryName,
                             b.title,
-                            COUNT(distinct c.quizIdx) AS 'quizAmount',
+                            COUNT(distinct c.quizIdx) AS 'quizCount',
                             b.viewCount,
-                            COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'boardLike'
+                            COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount'
                     FROM User a
                     LEFT JOIN Board b on a.userIdx = b.userIdx
                     LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
@@ -23,9 +23,9 @@ async function selectUserCategoryFeed(connection, userIdx, categoryName) {
   const selectUserCategoryFeedQuery = `
                     SELECT d.categoryName,
                             b.title,
-                            COUNT(distinct c.quizIdx) AS 'quizAmount',
+                            COUNT(distinct c.quizIdx) AS 'quizCount',
                             b.viewCount,
-                            COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'boardLike'
+                            COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount'
                     FROM User a
                     LEFT JOIN Board b on a.userIdx = b.userIdx
                     LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
@@ -106,9 +106,9 @@ async function selectCategoryFeed(connection, categoryIdx) {
                                   ELSE CONCAT(TIMESTAMPDIFF(MONTH, b.createdAt, NOW()), '달 전')
                                 END AS 'elapsedTime',
                                 b.title,
-                                COUNT(distinct c.quizIdx) AS 'quizAmount',
+                                COUNT(distinct c.quizIdx) AS 'quizCount',
                                 b.viewCount,
-                                COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'boardLike'
+                                COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount'
                         FROM User a
                         LEFT JOIN Board b on a.userIdx = b.userIdx
                         LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
