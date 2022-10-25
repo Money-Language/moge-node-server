@@ -25,8 +25,10 @@ exports.getBoardListByIdx = async function (req, res) {
     const userIdFromJWT = req.verifiedToken.userIdx;
     const boardResult = await boardProvider.viewBoard();
     const categoryResult = await boardProvider.viewCategory();
+    const userCategoryResult = await boardProvider.viewUserCategory(userIdx);
     const boardUserIdxList = await Promise.all(boardResult.map(async(val) => val.userIdx))
     const boardCategoryList = await Promise.all(categoryResult.map(async(val) => val.categoryName))
+    const boardUserCategoryList = await Promise.all(userCategoryResult.map(async(val) => val.categoryName))
 
     if(!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     if (userIdFromJWT != userIdx) {
@@ -42,13 +44,13 @@ exports.getBoardListByIdx = async function (req, res) {
             } else {
                 // 유가 작성한 게시글 카테고리별로 필터링 조회
                 const categoryFeedByUserIdx = await boardProvider.viewFeedByUserIdx(userIdx, categoryName);
-                for (i=0; i<boardCategoryList.length; i++) {
-                    if (boardCategoryList[i] !== categoryName) {
-                        return res.send(errResponse(baseResponse.CATEGORY_CATEGORY_IDX_NOT_EXIST));
-                    } else {
+                // for (i=0; i < boardUserCategoryList.length; i++) {
+                    // if (!boardUserCategoryList[i].includes(categoryName)) {
+                    //     return res.send(errResponse(baseResponse.CATEGORY_CATEGORY_IDX_NOT_EXIST));
+                    // } else {
                         return res.send(response(baseResponse.SUCCESS, categoryFeedByUserIdx));
-                    }
-                }
+                    // }
+                // }
             }
         }
     }

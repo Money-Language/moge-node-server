@@ -58,6 +58,18 @@ async function selectCategory(connection) {
   return categoryRows;
 }
 
+// 유저가 선택한 카테고리 조회
+async function selectUserCategory(connection, userIdx) {
+  const selectUserCategoryQuery = `
+                  SELECT b.categoryName
+                  FROM UserCategory a
+                  LEFT JOIN Category b ON a.categoryIdx = b.categoryIdx
+                  WHERE a.userIdx = ?;
+                `;
+  const [userCategoryRows] = await connection.query(selectUserCategoryQuery, userIdx);
+  return userCategoryRows;
+}
+
 // 게시글 조회수 증가 쿼리
 async function updateViewCount(connection, boardIdx) {
   const updateViewCountQuery = `
@@ -119,6 +131,7 @@ module.exports = {
   selectUserCategoryFeed,
   selectBoard,
   selectCategory,
+  selectUserCategory,
   updateViewCount,
   categoryTitleInfo,
   selectCategoryFeed,

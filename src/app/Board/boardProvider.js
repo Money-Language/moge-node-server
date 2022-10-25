@@ -24,19 +24,27 @@ exports.viewFeedByUserIdx = async function (userIdx, categoryName) {
 
 // 모든 게시글 조회
 exports.viewBoard = async function () {
-const connection = await pool.getConnection(async (conn) => conn);
-const userBoardResult = await boardDao.selectBoard(connection);
-connection.release();
-return userBoardResult;
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userBoardResult = await boardDao.selectBoard(connection);
+    connection.release();
+    return userBoardResult;
 };
 
 // 모든 카테고리 조회
 exports.viewCategory = async function () {
-const connection = await pool.getConnection(async (conn) => conn);
-const categoryResult = await boardDao.selectCategory(connection);
-connection.release();
-return categoryResult;
+    const connection = await pool.getConnection(async (conn) => conn);
+    const categoryResult = await boardDao.selectCategory(connection);
+    connection.release();
+    return categoryResult;
 };
+
+// 유저가 선택한 카테고리 조회
+exports.viewUserCategory = async function (userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userCategoryResult = await boardDao.selectUserCategory(connection, userIdx);
+    connection.release();
+    return userCategoryResult;
+    };
 
 // 각 카테고리의 제목, 서브제목 조회
 exports.viewCategoryTitle = async function (categoryIdx) {
