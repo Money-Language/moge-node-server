@@ -61,7 +61,7 @@ async function selectCategory(connection) {
 // 유저가 선택한 카테고리 조회
 async function selectUserCategory(connection, userIdx) {
   const selectUserCategoryQuery = `
-                  SELECT b.categoryName
+                  SELECT b.categoryName, a.categoryIdx
                   FROM UserCategory a
                   LEFT JOIN Category b ON a.categoryIdx = b.categoryIdx
                   WHERE a.userIdx = ?;

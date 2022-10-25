@@ -27,8 +27,8 @@ exports.getBoardListByIdx = async function (req, res) {
     const categoryResult = await boardProvider.viewCategory();
     const userCategoryResult = await boardProvider.viewUserCategory(userIdx);
     const boardUserIdxList = await Promise.all(boardResult.map(async(val) => val.userIdx))
-    const boardCategoryList = await Promise.all(categoryResult.map(async(val) => val.categoryName))
-    const boardUserCategoryList = await Promise.all(userCategoryResult.map(async(val) => val.categoryName))
+    const boardCategoryIdx = await Promise.all(categoryResult.map(async(val) => val.categoryIdx))
+    const boardUserCategoryIdx = await Promise.all(userCategoryResult.map(async(val) => val.categoryIdx))
 
     if(!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     if (userIdFromJWT != userIdx) {
@@ -44,13 +44,13 @@ exports.getBoardListByIdx = async function (req, res) {
             } else {
                 // 유가 작성한 게시글 카테고리별로 필터링 조회
                 const categoryFeedByUserIdx = await boardProvider.viewFeedByUserIdx(userIdx, categoryName);
-                // for (i=0; i < boardUserCategoryList.length; i++) {
-                    // if (!boardUserCategoryList[i].includes(categoryName)) {
-                    //     return res.send(errResponse(baseResponse.CATEGORY_CATEGORY_IDX_NOT_EXIST));
-                    // } else {
+                for (i=0; i < boardCategoryIdx.length; i++) {
+                    if (!boardCategoryIdx.filter(x => boardUserCategoryIdx.includes(x))) {
+                        return res.send(errResponse(baseResponse.CATEGORY_CATEGORY_IDX_NOT_EXIST));
+                    } else {
                         return res.send(response(baseResponse.SUCCESS, categoryFeedByUserIdx));
-                    // }
-                // }
+                    }
+                }
             }
         }
     }
@@ -75,7 +75,7 @@ exports.increaseViewCount = async function (req, res) {
 
 
 /**
- * API No. 4
+ * API No. 5
  * API Name : 각 카테고리 별로 게시글(피드) 조회 (홈화면 조회)
  * [GET] /app/boards/{categoryIdx}
  */
