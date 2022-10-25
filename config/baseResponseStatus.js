@@ -32,6 +32,7 @@ module.exports = {
 
     USER_STATUS_EMPTY : { "isSuccess": false, "code": 2018, "message": "회원 상태값을 입력해주세요" },
 
+    USER_JWT_TOKEN_WRONG : { "isSuccess": false, "code": 2019, "message": "JWT 토큰이 올바르지 않습니다." },
     USER_ACCESS_TOKEN_WRONG : { "isSuccess": false, "code": 2020, "message": "accessToken이 올바르지 않습니다." },
     USER_INFO_EMPTY : { "isSuccess": false, "code": 2021, "message": "유저 정보가 비어 있습니다." },
     USER_BOARD_LIST_EMPTY : { "isSuccess": false, "code": 2022, "message": "해당 유저가 작성한 게시글이 없습니다." },
