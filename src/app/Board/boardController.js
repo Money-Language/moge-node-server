@@ -10,6 +10,7 @@ const {emit} = require("nodemon");
 const jwt = require('jsonwebtoken');
 
 
+
 /**
  * API No. 3
  * API Name : 각 유저가 작성한 게시글(피드) 조회
@@ -99,6 +100,51 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
             const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
             const feedByCategoryIdx = await boardProvider.viewFeedByCategoryIdx(categoryIdx);
             return res.send(response(baseResponse.SUCCESS, [categoryTitleResult[0], feedByCategoryIdx]));
+        }
+    }
+};
+
+
+
+/**
+ * API No. 6
+ * API Name : 각 게시글(피드) 별로 퀴즈 문제들 조회 ( + 답안도 조회 )
+ * [GET] /app/boards/{boardIdx}/quiz
+ */
+exports.getQuizByBoardIdx = async function (req, res) {
+    /**
+     * Path Parameter : boardIdx
+     * Query String : quizIdx
+     */
+    const boardIdx = req.params.boardIdx;
+    const quizIdx = req.query.quizIdx
+    const boardResult = await boardProvider.viewBoard();
+    const quizResult = await boardProvider.viewQuiz();
+    const boardIdxList = await Promise.all(boardResult.map(async(val) => val.boardIdx))
+    const quizIdxList = await Promise.all(quizResult.map(async(val) => val.quizIdx))
+
+    if(!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
+    if (!boardIdxList.includes(parseInt(boardIdx))) {
+        return res.send(errResponse(baseResponse.BOARD_BOARDIDX_NOT_EXIST));
+    } else {
+        if (!quizIdx) {
+            // 피드 당 전체 퀴즈 문제 조회
+            const boardQuizByBoardIdx = await boardProvider.viewQuizByBoardIdx(boardIdx);
+            return res.send(response(baseResponse.SUCCESS, boardQuizByBoardIdx));
+        } else {
+            // 각 문제당 정답 조회
+            const viewAnswerByQuizIdx = await boardProvider.viewQuizByBoardIdx(boardIdx, quizIdx);
+            const boardIdxByQuizIdxResult = await boardProvider.viewBoardIdxByQuizIdx(quizIdx);
+            const quizIdxByOneBoardIdx = await Promise.all(boardIdxByQuizIdxResult.map(async(val) => val.boardIdx))
+            for (i=0; i < quizIdxList.length; i++) {
+                if (!quizIdxList.includes(parseInt(quizIdx))) {
+                    return res.send(errResponse(baseResponse.QUIZ_QUIZIDX_NOT_EXIST));
+                } else if (!quizIdxByOneBoardIdx.includes(parseInt(boardIdx))) {
+                    return res.send(errResponse(baseResponse.QUIZ_BOARDIDX_NOT_EXIST));
+                } else {
+                    return res.send(response(baseResponse.SUCCESS, viewAnswerByQuizIdx));
+                }
+            }
         }
     }
 };

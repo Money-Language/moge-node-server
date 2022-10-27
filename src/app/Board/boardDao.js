@@ -121,8 +121,58 @@ async function selectCategoryFeed(connection, categoryIdx) {
   return categoryFeedRow;
 }
 
+// 모든 퀴즈 조회
+async function selectQuiz(connection) {
+  const selectQuizQuery = `
+                  SELECT *
+                  FROM Quiz;
+                `;
+  const [quizRows] = await connection.query(selectQuizQuery);
+  return quizRows;
+}
+
+// 각자 퀴즈 문제의 게시글 번호 조회
+async function selectBoardIdxByQuizIdx(connection, quizIdx) {
+  const selectBoardIdxByQuizIdxQuery = `
+                    SELECT boardIdx
+                    FROM Quiz
+                    WHERE quizIdx = ?;
+                `;
+  const [selectBoardIdxByQuizIdxRows] = await connection.query(selectBoardIdxByQuizIdxQuery, quizIdx);
+  return selectBoardIdxByQuizIdxRows;
+}
 
 // 각 게시글(피드) 별로 퀴즈 문제들 조회
+async function selectBoardQuiz(connection, boardIdx) {
+  const selectBoardQuizQuery = `
+                  SELECT quizIdx, quizStatus, question
+                  FROM Quiz
+                  WHERE boardIdx = ?;
+              `;
+  const [selectBoardQuizRow] = await connection.query(selectBoardQuizQuery, boardIdx);
+  return selectBoardQuizRow;
+}
+
+// 각 퀴즈 마다 정답 조회
+async function selectQuizAnswer(connection, boardIdx, quizIdx) {
+  const selectQuizAnswerQuery = `
+                    SELECT a.boardIdx, a.quizIdx,
+                      IF(c.hint IS NULL, 'OBJECTIVE', c.hint) AS subjectiveHint,
+                      IF (a.quizStatus = '객관식', (b.answer), (c.answer)) AS answer,
+                      IF (a.quizStatus = '객관식', (b.answerSelectIdx), (c.answerSelectIdx)) AS answerSelectIdx,
+                      CASE
+                          WHEN b.answerStatus = 'TRUE' THEN 'CORRECT'
+                          WHEN c.hint IS NOT NULL THEN 'SUBJECTIVE'
+                          ELSE 'WRONG'
+                      END AS objectiveAnswer
+                    FROM Quiz a
+                    LEFT JOIN ObjectiveAnswer b on a.quizIdx = b.quizIdx
+                    LEFT JOIN SubjectiveAnswer c on a.quizIdx = c.quizIdx
+                    WHERE a.boardIdx = ? AND a.quizIdx = ?;
+              `;
+  const [selectQuizAnswerRow] = await connection.query(selectQuizAnswerQuery, [boardIdx, quizIdx]);
+  return selectQuizAnswerRow;
+}
 
 
 
@@ -135,4 +185,8 @@ module.exports = {
   updateViewCount,
   categoryTitleInfo,
   selectCategoryFeed,
+  selectQuiz,
+  selectBoardIdxByQuizIdx,
+  selectBoardQuiz,
+  selectQuizAnswer
   };

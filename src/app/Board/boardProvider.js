@@ -14,7 +14,7 @@ exports.viewFeedByUserIdx = async function (userIdx, categoryName) {
         connection.release();
         return userFeedResult;
     } else {
-        // 카테고리 이름 req가 없을 때
+        // 카테고리 이름 req가 있을 때
         const connection = await pool.getConnection(async (conn) => conn);
         const userCategoryFeedResult = await boardDao.selectUserCategoryFeed(connection, userIdx, categoryName);
         connection.release();
@@ -60,4 +60,37 @@ exports.viewFeedByCategoryIdx = async function (categoryIdx) {
     const categoryFeedResult = await boardDao.selectCategoryFeed(connection, categoryIdx);
     connection.release();
     return categoryFeedResult;
+};
+
+// 모든 퀴즈 조회
+exports.viewQuiz = async function () {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const quizResult = await boardDao.selectQuiz(connection);
+    connection.release();
+    return quizResult;
+};
+
+// 퀴즈 번호로 게시글 인덱스 조회
+exports.viewBoardIdxByQuizIdx = async function (quizIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const boardIdxByQuizIdxResult = await boardDao.selectBoardIdxByQuizIdx(connection, quizIdx);
+    connection.release();
+    return boardIdxByQuizIdxResult;
+};
+
+// 각 게시글(피드) 별로 퀴즈 문제들 & 각 문제의 정답 조회
+exports.viewQuizByBoardIdx = async function (boardIdx, quizIdx) {
+    if (!quizIdx) {
+        // 퀴즈 인덱스 req가 없을 때
+        const connection = await pool.getConnection(async (conn) => conn);
+        const viewQuestionResult = await boardDao.selectBoardQuiz(connection, boardIdx);
+        connection.release();
+        return viewQuestionResult;
+    } else {
+        // 퀴즈 인덱스 req가 있을 때
+        const connection = await pool.getConnection(async (conn) => conn);
+        const viewAnswerResult = await boardDao.selectQuizAnswer(connection, boardIdx, quizIdx);
+        connection.release();
+        return viewAnswerResult;
+    }
 };
