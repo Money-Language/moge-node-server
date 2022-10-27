@@ -41,6 +41,10 @@ module.exports = {
     CATEGORY_LIST_EMPTY : { "isSuccess": false, "code": 2024, "message": "해당 카테고리에 존재하는 퀴즈가 없습니다." },
 
     BOARD_BOARDIDX_EMPTY : { "isSuccess": false, "code": 2025, "message": "게시글 인덱스가 비어있습니다." },
+    BOARD_BOARDIDX_NOT_EXIST : { "isSuccess": false, "code": 2026, "message": "해당 게시글은 존재하지 않습니다." },
+    
+    QUIZ_QUIZIDX_NOT_EXIST : { "isSuccess": false, "code": 2027, "message": "해당 퀴즈 문제는 존재하지 않습니다." },
+    QUIZ_BOARDIDX_NOT_EXIST : { "isSuccess": false, "code": 2028, "message": "해당 퀴즈 문제는 해당 게시글에 존재하지 않습니다." },
 
 
 
