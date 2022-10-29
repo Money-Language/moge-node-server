@@ -46,6 +46,15 @@ module.exports = {
     QUIZ_QUIZIDX_NOT_EXIST : { "isSuccess": false, "code": 2027, "message": "해당 퀴즈 문제는 존재하지 않습니다." },
     QUIZ_BOARDIDX_NOT_EXIST : { "isSuccess": false, "code": 2028, "message": "해당 퀴즈 문제는 해당 게시글에 존재하지 않습니다." },
 
+    ANSWER_ANSWERSELECTIDX_INCORRECT : { "isSuccess": false, "code": 2029, "message": "answerSelectIdx는 '01', '02' 중에서만 선택 가능합니다. " },
+
+    BOARD_CATEGORYIDX_NOT_EXIST : { "isSuccess": false, "code": 2030, "message": "카테고리 인덱스를 입력해 주세요." },
+    BOARD_TITLE_NOT_EXIST : { "isSuccess": false, "code": 2031, "message": "게시글 제목을 입력해 주세요."  },
+    BOARD_QUIZ_STATUS_NOT_EXIST : { "isSuccess": false, "code": 2032, "message": "퀴즈 문제 분류를 입력해 주세요." },
+    BOARD_QUESTION_NOT_EXIST : { "isSuccess": false, "code": 2033, "message": "퀴즈 문제를 입력해 주세요." },
+    BOARD_HINT_NOT_EXIST : { "isSuccess": false, "code": 2034, "message": "퀴즈 힌트를 입력해 주세요." },
+    BOARD_ANSWER_SELECT_IDX_NOT_EXIST : { "isSuccess": false, "code": 2035, "message": "정답 선택 인덱스를 입력해 주세요." },
+    BOARD_ANSWER_NOT_EXIST : { "isSuccess": false, "code": 2036, "message": "정답 답안을 입력해 주세요." },
 
 
 
@@ -57,6 +66,8 @@ module.exports = {
     SIGNIN_PASSWORD_WRONG : { "isSuccess": false, "code": 3004, "message": "비밀번호가 잘못 되었습니다." },
     SIGNIN_INACTIVE_ACCOUNT : { "isSuccess": false, "code": 3005, "message": "비활성화 된 계정입니다. 고객센터에 문의해주세요." },
     SIGNIN_WITHDRAWAL_ACCOUNT : { "isSuccess": false, "code": 3006, "message": "탈퇴 된 계정입니다. 고객센터에 문의해주세요." },
+
+    SUBJECTIVE_ANSWERSELECTIDX_NOT_EXIST : { "isSuccess": false, "code": 3009, "message": "주관식 정답에는 answerSelected가 01 고정입니다." },
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
