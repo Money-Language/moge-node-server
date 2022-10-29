@@ -97,9 +97,39 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
             return res.send(errResponse(baseResponse.CATEGORY_LIST_EMPTY));
         }
         else {
-            const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
+            // const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
             const feedByCategoryIdx = await boardProvider.viewFeedByCategoryIdx(categoryIdx);
-            return res.send(response(baseResponse.SUCCESS, [categoryTitleResult[0], feedByCategoryIdx]));
+            // return res.send(response(baseResponse.SUCCESS, [categoryTitleResult[0], feedByCategoryIdx]));
+            return res.send(response(baseResponse.SUCCESS,feedByCategoryIdx));
+        }
+    }
+};
+
+
+/**
+ * API No. 6
+ * API Name : 각 카테고리 별로 카테고리 이름, 서브타이틀 조회
+ * [GET] /app/boards/category-name/{categoryIdx}
+ */
+exports.getCategoryTitleBycategoryIdx = async function (req, res) {
+    /**
+     * Path Parameter : categoryIdx
+     */
+    const categoryIdx = req.params.categoryIdx;
+    const boardResult = await boardProvider.viewBoard();
+    const categoryResult = await boardProvider.viewCategory();
+    const boardCategoryIdxList = await Promise.all(boardResult.map(async(val) => val.categoryIdx))
+    const categoryIdxList = await Promise.all(categoryResult.map(async(val) => val.categoryIdx))
+
+    if (!categoryIdxList.includes(parseInt(categoryIdx))) {
+        return res.send(errResponse(baseResponse.CATEGORY_CATEGORY_IDX_NOT_EXIST));
+    } else {
+        if (!boardCategoryIdxList.includes(parseInt(categoryIdx))) {
+            return res.send(errResponse(baseResponse.CATEGORY_LIST_EMPTY));
+        }
+        else {
+            const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
+            return res.send(response(baseResponse.SUCCESS, categoryTitleResult[0]));
         }
     }
 };
@@ -107,17 +137,18 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
 
 
 /**
- * API No. 6
- * API Name : 각 게시글(피드) 별로 퀴즈 문제들 조회 ( + 답안도 조회 )
+ * API No. 7
+ * API Name : 각 게시글(피드) 별로 퀴즈 문제들 조회 ( + 답안 + 답안 보기도 조회 )
  * [GET] /app/boards/{boardIdx}/quiz
  */
 exports.getQuizByBoardIdx = async function (req, res) {
     /**
      * Path Parameter : boardIdx
-     * Query String : quizIdx
+     * Query String : quizIdx, answerSelectIdx
      */
     const boardIdx = req.params.boardIdx;
-    const quizIdx = req.query.quizIdx
+    const quizIdx = req.query.quizIdx;
+    const answerSelectIdx = req.query.answerSelectIdx;
     const boardResult = await boardProvider.viewBoard();
     const quizResult = await boardProvider.viewQuiz();
     const boardIdxList = await Promise.all(boardResult.map(async(val) => val.boardIdx))
@@ -131,7 +162,7 @@ exports.getQuizByBoardIdx = async function (req, res) {
             // 피드 당 전체 퀴즈 문제 조회
             const boardQuizByBoardIdx = await boardProvider.viewQuizByBoardIdx(boardIdx);
             return res.send(response(baseResponse.SUCCESS, boardQuizByBoardIdx));
-        } else {
+        } else if (quizIdx && !answerSelectIdx) {
             // 각 문제당 정답 조회
             const viewAnswerByQuizIdx = await boardProvider.viewQuizByBoardIdx(boardIdx, quizIdx);
             const boardIdxByQuizIdxResult = await boardProvider.viewBoardIdxByQuizIdx(quizIdx);
@@ -145,6 +176,52 @@ exports.getQuizByBoardIdx = async function (req, res) {
                     return res.send(response(baseResponse.SUCCESS, viewAnswerByQuizIdx));
                 }
             }
+        } else if (quizIdx && answerSelectIdx) {
+            // 각 문제당 정답 여부 조회
+            const viewAnswerCorrectByQuizIdx = await boardProvider.viewQuizByBoardIdx(boardIdx, quizIdx, answerSelectIdx);
+            if (answerSelectIdx !== "01" && answerSelectIdx !== "02") {
+                return res.send(errResponse(baseResponse.ANSWER_ANSWERSELECTIDX_INCORRECT));
+            } else {
+                return res.send(response(baseResponse.SUCCESS, viewAnswerCorrectByQuizIdx));
+            }
         }
     }
 };
+
+
+
+/**
+ * API No. 8
+ * API Name : 게시글 등록 API
+ * [POST] /app/users/{userIdx}/boards
+ */
+exports.postBoardQuiz = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+
+    const { categoryIdx, title, quizType, question, hint, answerSelectIdx, answer } = req.body;
+
+    console.log(title)
+    console.log(quizType)
+    console.log(question);
+    console.log(hint);
+    console.log(answerSelectIdx);
+    console.log(answer);
+
+    if(!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG))
+    }
+    if(!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
+    if(!title) return res.send(errResponse(baseResponse.BOARD_TITLE_NOT_EXIST));
+    if(!quizType) return res.send(errResponse(baseResponse.BOARD_QUIZ_STATUS_NOT_EXIST));
+    if(!question) return res.send(errResponse(baseResponse.BOARD_QUESTION_NOT_EXIST));
+    // if(!hint) return res.send(errResponse(baseResponse.BOARD_HINT_NOT_EXIST));
+    if(!answerSelectIdx) return res.send(errResponse(baseResponse.BOARD_ANSWER_SELECT_IDX_NOT_EXIST));
+    if(!answer) return res.send(errResponse(baseResponse.BOARD_ANSWER_NOT_EXIST));
+
+    const boardQuizResponse = await boardService.createBoardQuiz(userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer);
+
+    return res.send(boardQuizResponse)
+}

@@ -1,5 +1,7 @@
 const { pool } = require("../../../config/database");
 const { logger } = require("../../../config/winston");
+const baseResponse = require("../../../config/baseResponseStatus");
+const {response, errResponse} = require("../../../config/response");
 
 const boardDao = require("./boardDao");
 
@@ -79,18 +81,36 @@ exports.viewBoardIdxByQuizIdx = async function (quizIdx) {
 };
 
 // 각 게시글(피드) 별로 퀴즈 문제들 & 각 문제의 정답 조회
-exports.viewQuizByBoardIdx = async function (boardIdx, quizIdx) {
-    if (!quizIdx) {
-        // 퀴즈 인덱스 req가 없을 때
+exports.viewQuizByBoardIdx = async function (boardIdx, quizIdx, answerSelectIdx) {
+
+    if (!quizIdx && !answerSelectIdx) {
+        // 퀴즈 인덱스 req랑 정답 인덱스 req 둘 다 없을 때
         const connection = await pool.getConnection(async (conn) => conn);
         const viewQuestionResult = await boardDao.selectBoardQuiz(connection, boardIdx);
         connection.release();
         return viewQuestionResult;
-    } else {
-        // 퀴즈 인덱스 req가 있을 때
+    } else if (quizIdx && !answerSelectIdx) {
+        // 퀴즈 인덱스는 있지만 정답 인덱스 req가 없을 때
         const connection = await pool.getConnection(async (conn) => conn);
         const viewAnswerResult = await boardDao.selectQuizAnswer(connection, boardIdx, quizIdx);
         connection.release();
         return viewAnswerResult;
+    } else if (quizIdx && answerSelectIdx) {
+        // 퀴즈 인덱스 req와 정답 인덱스 req 둘 다 있을 때
+        const connection = await pool.getConnection(async (conn) => conn);
+        const quizTypeByIdxResult = await boardDao.selectQuizTypeByQuizIdx(connection, quizIdx);
+        const quizTypeByIdxList = await Promise.all(quizTypeByIdxResult.map(async(val) => val.quizType))
+
+        if (quizTypeByIdxList == "객관식") {
+            const viewObjectiveAnswerCorrectResult = await boardDao.selectObjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, answerSelectIdx);
+            connection.release();
+            return viewObjectiveAnswerCorrectResult;
+        } else if (quizTypeByIdxList == "주관식" && answerSelectIdx == '02') {
+            return errResponse(baseResponse.SUBJECTIVE_ANSWERSELECTIDX_NOT_EXIST);
+        } else {
+            const viewSubjectiveAnswerCorrectResult = await boardDao.selectSubjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, answerSelectIdx);
+            connection.release();
+            return viewSubjectiveAnswerCorrectResult;
+        }
     }
 };

@@ -58,6 +58,16 @@ async function selectCategory(connection) {
   return categoryRows;
 }
 
+// 모든 퀴즈 조회
+async function selectQuiz(connection) {
+  const selectQuizQuery = `
+                  SELECT *
+                  FROM Quiz;
+                `;
+  const [quizRows] = await connection.query(selectQuizQuery);
+  return quizRows;
+}
+
 // 유저가 선택한 카테고리 조회
 async function selectUserCategory(connection, userIdx) {
   const selectUserCategoryQuery = `
@@ -121,14 +131,15 @@ async function selectCategoryFeed(connection, categoryIdx) {
   return categoryFeedRow;
 }
 
-// 모든 퀴즈 조회
-async function selectQuiz(connection) {
-  const selectQuizQuery = `
-                  SELECT *
-                  FROM Quiz;
+// 퀴즈 아이디로 퀴즈 타입 조회
+async function selectQuizTypeByQuizIdx(connection, quizIdx) {
+  const selectTypeQuizQuery = `
+                  SELECT distinct quizType
+                  FROM Quiz
+                  WHERE quizIdx = ?;
                 `;
-  const [quizRows] = await connection.query(selectQuizQuery);
-  return quizRows;
+  const [quizTypeRows] = await connection.query(selectTypeQuizQuery, quizIdx);
+  return quizTypeRows;
 }
 
 // 각자 퀴즈 문제의 게시글 번호 조회
@@ -145,7 +156,7 @@ async function selectBoardIdxByQuizIdx(connection, quizIdx) {
 // 각 게시글(피드) 별로 퀴즈 문제들 조회
 async function selectBoardQuiz(connection, boardIdx) {
   const selectBoardQuizQuery = `
-                  SELECT quizIdx, quizStatus, question
+                  SELECT quizIdx, quizType, question
                   FROM Quiz
                   WHERE boardIdx = ?;
               `;
@@ -153,18 +164,12 @@ async function selectBoardQuiz(connection, boardIdx) {
   return selectBoardQuizRow;
 }
 
-// 각 퀴즈 마다 정답 조회
+// 각 퀴즈 마다 정답 보기 조회
 async function selectQuizAnswer(connection, boardIdx, quizIdx) {
   const selectQuizAnswerQuery = `
                     SELECT a.boardIdx, a.quizIdx,
                       IF(c.hint IS NULL, 'OBJECTIVE', c.hint) AS subjectiveHint,
-                      IF (a.quizStatus = '객관식', (b.answer), (c.answer)) AS answer,
-                      IF (a.quizStatus = '객관식', (b.answerSelectIdx), (c.answerSelectIdx)) AS answerSelectIdx,
-                      CASE
-                          WHEN b.answerStatus = 'TRUE' THEN 'CORRECT'
-                          WHEN c.hint IS NOT NULL THEN 'SUBJECTIVE'
-                          ELSE 'WRONG'
-                      END AS objectiveAnswer
+                      IF (a.quizType = '객관식', (b.answer), 'SECRET') AS answer
                     FROM Quiz a
                     LEFT JOIN ObjectiveAnswer b on a.quizIdx = b.quizIdx
                     LEFT JOIN SubjectiveAnswer c on a.quizIdx = c.quizIdx
@@ -174,6 +179,70 @@ async function selectQuizAnswer(connection, boardIdx, quizIdx) {
   return selectQuizAnswerRow;
 }
 
+// 각 퀴즈 마다 정답 여부 조회 (객관식)
+async function selectObjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, answerSelectIdx) {
+  const selectQuizAnswerCorrectQuery = `
+                    SELECT a.boardIdx, a.quizIdx, b.answerSelectIdx, b.answer,
+                      IF(b.answerSelectIdx = '01', 'CORRECT', 'WRONG') AS answerCorrect
+                    FROM Quiz a
+                    LEFT JOIN ObjectiveAnswer b on a.quizIdx = b.quizIdx
+                    WHERE a.boardIdx = ? AND a.quizIdx = ? AND b.answerSelectIdx = ?;
+              `;
+  const [selectObjectiveQuizAnswerCorrectRow] = await connection.query(selectQuizAnswerCorrectQuery, [boardIdx, quizIdx, answerSelectIdx]);
+  return selectObjectiveQuizAnswerCorrectRow;
+}
+
+// 각 퀴즈 마다 정답 여부 조회 (주관식)
+async function selectSubjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, answerSelectIdx) {
+  const selectQuizAnswerCorrectQuery = `
+                      SELECT a.boardIdx, a.quizIdx, b.answerSelectIdx, b.answer
+                      FROM Quiz a
+                      LEFT JOIN SubjectiveAnswer b on a.quizIdx = b.quizIdx
+                      WHERE a.boardIdx = ? AND a.quizIdx = ? AND b.answerSelectIdx = ?;
+              `;
+  const [selectSubjectiveQuizAnswerCorrectRow] = await connection.query(selectQuizAnswerCorrectQuery, [boardIdx, quizIdx, answerSelectIdx]);
+  return selectSubjectiveQuizAnswerCorrectRow;
+}
+
+// 게시글 등록
+async function createBoard(connection, title, userIdx, categoryIdx) {
+  const boardQuery = `
+      INSERT INTO Board(title, userIdx, categoryIdx)
+      VALUES (?, ?, ?);
+  `;
+  const [createBoardRows] = await connection.query(boardQuery, [title, userIdx, categoryIdx]);
+  return createBoardRows;
+}
+
+// 퀴즈 등록
+async function createQuiz(connection, question, quizType, boardIdx) {
+  const quizQuery = `
+      INSERT INTO Quiz(question, quizType, boardIdx)
+      VALUES (?, ?, ?);
+  `;
+  const [createQuizRows] = await connection.query(quizQuery, [question, quizType, boardIdx]);
+  return createQuizRows;
+}
+
+// 객관식 정답 등록
+async function createObjectiveAnswer(connection, answer, answerSelectIdx, quizIdx) {
+  const objectAnswerQuery = `
+      INSERT INTO ObjectiveAnswer(answer, answerSelectIdx, quizIdx)
+      VALUES (?, ?, ?);
+  `;
+  const [createObjectAnswerRows] = await connection.query(objectAnswerQuery, [answer, answerSelectIdx, quizIdx]);
+  return createObjectAnswerRows;
+}
+
+// 주관식 정답 등록
+async function createSubjectiveAnswer(connection, hint, answerSelectIdx, answer, quizIdx) {
+  const subjectAnswerQuery = `
+      INSERT INTO SubjectiveAnswer(hint, answerSelectIdx, answer, quizIdx)
+      VALUES (?, ?, ?, ?);
+  `;
+  const [createSubjectAnswerRows] = await connection.query(subjectAnswerQuery, [hint, answerSelectIdx, answer, quizIdx]);
+  return createSubjectAnswerRows;
+}
 
 
 module.exports = { 
@@ -186,7 +255,14 @@ module.exports = {
   categoryTitleInfo,
   selectCategoryFeed,
   selectQuiz,
+  selectQuizTypeByQuizIdx,
   selectBoardIdxByQuizIdx,
   selectBoardQuiz,
-  selectQuizAnswer
+  selectQuizAnswer,
+  selectObjectiveQuizAnswerCorrect,
+  selectSubjectiveQuizAnswerCorrect,
+  createBoard,
+  createQuiz,
+  createObjectiveAnswer,
+  createSubjectiveAnswer
   };
