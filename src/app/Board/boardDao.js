@@ -172,6 +172,7 @@ async function selectBoardQuiz(connection, boardIdx) {
 async function selectQuizAnswer(connection, boardIdx, quizIdx) {
   const selectQuizAnswerQuery = `
                     SELECT a.boardIdx, a.quizIdx,
+                      IF (a.quizType = '객관식', (b.answerSelectIdx), (c.answerSelectIdx)) AS selectAnswerIdx,
                       IF(c.hint IS NULL, 'OBJECTIVE', c.hint) AS subjectiveHint,
                       IF (a.quizType = '객관식', (b.answer), 'SECRET') AS answer
                     FROM Quiz a
