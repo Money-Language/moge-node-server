@@ -1,7 +1,8 @@
 // 각 유저가 작성한 게시글(피드) 조회
 async function selectUserFeed(connection, userIdx) {
   const selectUserFeedQuery = `
-                    SELECT d.categoryName,
+                    SELECT  b.boardIdx,
+                            d.categoryName,
                             b.title,
                             COUNT(distinct c.quizIdx) AS 'quizCount',
                             b.viewCount,
@@ -23,7 +24,8 @@ async function selectUserFeed(connection, userIdx) {
 // 카테고리별로 각 유저가 작성한 게시글(피드) 조회
 async function selectUserCategoryFeed(connection, userIdx, categoryName) {
   const selectUserCategoryFeedQuery = `
-                    SELECT d.categoryName,
+                    SELECT  b.boardIdx,
+                            d.categoryName,
                             b.title,
                             COUNT(distinct c.quizIdx) AS 'quizCount',
                             b.viewCount,
@@ -109,7 +111,8 @@ async function categoryTitleInfo(connection, categoryIdx) {
 // 각 카테고리 별로 게시글 조회
 async function selectCategoryFeed(connection, categoryIdx) {
   const selectCategoryFeedQuery = `
-                        SELECT a.nickname,
+                        SELECT  b.boardIdx,
+                                a.nickname,
                                 a.profileImage,
                                 CASE
                                   WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) <= 0 THEN '방금 전'
