@@ -56,6 +56,9 @@ module.exports = {
     BOARD_ANSWER_SELECT_IDX_NOT_EXIST : { "isSuccess": false, "code": 2035, "message": "정답 선택 인덱스를 입력해 주세요." },
     BOARD_ANSWER_NOT_EXIST : { "isSuccess": false, "code": 2036, "message": "정답 답안을 입력해 주세요." },
 
+    POINT_QUIZIDX_EXIST : { "isSuccess": false, "code": 2037, "message": "퀴즈 인덱스를 입력해 주세요." },
+    USER_QUIZ_MAKER_SAME : { "isSuccess": false, "code": 2038, "message": "자기가 낸 문제는 자기가 풀 수 없습니다." },
+
 
 
     // Response error
