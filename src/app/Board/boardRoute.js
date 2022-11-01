@@ -20,8 +20,14 @@ module.exports = function(app){
     // 7. 각 게시글 별로 퀴즈 문제들 조회 ( + 퀴즈의 답안 조회 )
     app.get('/app/boards/:boardIdx/quiz', board.getQuizByBoardIdx);
 
-    // 8. 게시글 등록 ( + 퀴즈 등록 병행 )
-    app.post('/app/users/:userIdx/boards', jwtMiddleware, board.postBoardQuiz);
+    // 8. 퀴즈 완료 후 유저 포인트 획득 API
+    app.post('/app/users/:userIdx/get-points', jwtMiddleware, board.increaseUserPoint);
+
+    // // 8. 객관식 퀴즈 등록
+    // app.post('/app/users/:userIdx/boards', jwtMiddleware, board.postBoardQuiz);
+
+    // // 8. 객관식 퀴즈 등록
+    // app.post('/app/users/:userIdx/boards', jwtMiddleware, board.postBoardQuiz);
 
 };
 

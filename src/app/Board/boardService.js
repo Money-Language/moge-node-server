@@ -26,6 +26,30 @@ exports.updateCountView = async function (boardIdx) {
     }
 }
 
+// 퀴즈 완료 후 유저 포인트 획득
+exports.updateUserPoint = async function (quizIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        const quizTypeByIdxResult = await boardDao.selectQuizTypeByQuizIdx(connection, quizIdx);
+        const quizTypeByIdxList = await Promise.all(quizTypeByIdxResult.map(async(val) => val.quizType))
+        if (quizTypeByIdxList == "객관식") {
+            const updateUserPointToObjectiveResult = await boardDao.userPointAfterObjectiveQuiz(connection, quizIdx, userIdx)
+            await connection.commit();
+            return response(baseResponse.SUCCESS, updateUserPointToObjectiveResult);
+        } else {
+            const updateUserPointToSubjectiveResult = await boardDao.userPointAfterSubjectiveQuiz(connection, quizIdx, userIdx)
+            await connection.commit();
+            return response(baseResponse.SUCCESS, updateUserPointToSubjectiveResult);
+        }
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - updateUserPoint Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
 
 // 게시글 + 퀴즈 + 객관식/주관식 정답 등록
 exports.createBoardQuiz = async ( categoryIdx, title, userIdx, quizType, question, hint, answerSelectIdx, answer ) => {

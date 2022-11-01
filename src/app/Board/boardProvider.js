@@ -114,3 +114,11 @@ exports.viewQuizByBoardIdx = async function (boardIdx, quizIdx, answerSelectIdx)
         }
     }
 };
+
+// 퀴즈 번호로 해당 퀴즈를 작성한 유저 인덱스 조회
+exports.viewUserIdxByQuizIdx = async function (quizIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userIdxByQuizIdxResult = await boardDao.selectUserIdxByQuizIdx(connection, quizIdx);
+    connection.release();
+    return userIdxByQuizIdxResult;
+};

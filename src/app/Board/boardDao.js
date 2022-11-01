@@ -212,6 +212,45 @@ async function selectSubjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, 
   return selectSubjectiveQuizAnswerCorrectRow;
 }
 
+// 퀴즈 완료 후 유저 포인트 획득 (객관식)
+async function userPointAfterObjectiveQuiz(connection, quizIdx, userIdx) {
+  const userPointAfterObjectiveQuizQuery = `
+                        UPDATE User a
+                        LEFT JOIN Quiz b ON b.quizIdx = ?
+                        LEFT JOIN ObjectiveAnswer c on b.quizIdx = c.quizIdx
+                        SET a.userPoint = a.userPoint + 10
+                        WHERE a.userIdx = ? AND c.answerSelectIdx ='01';
+                `;
+  const userPointAfterObjectiveQuizRow = await connection.query(userPointAfterObjectiveQuizQuery, [quizIdx, userIdx]);
+  return userPointAfterObjectiveQuizRow;
+}
+
+// 퀴즈 완료 후 유저 포인트 획득 (주관식)
+async function userPointAfterSubjectiveQuiz(connection, quizIdx, userIdx) {
+  const userPointAfterSubjectiveQuizQuery = `
+                        UPDATE User a
+                        LEFT JOIN Quiz b ON b.quizIdx = ?
+                        LEFT JOIN SubjectiveAnswer c on b.quizIdx = c.quizIdx
+                        SET a.userPoint = a.userPoint + 10
+                        WHERE a.userIdx = ? AND c.answerSelectIdx ='01';
+                `;
+  const userPointAfterSubjectiveQuizRow = await connection.query(userPointAfterSubjectiveQuizQuery, [quizIdx, userIdx]);
+  return userPointAfterSubjectiveQuizRow;
+}
+
+// 퀴즈를 출제한 사용자 인덱스 조회
+async function selectUserIdxByQuizIdx(connection, quizIdx) {
+  const selectUserIdxByQuizIdxQuery = `
+                        SELECT a.userIdx
+                        FROM User a
+                        LEFT JOIN Board b ON a.userIdx = b.userIdx
+                        LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
+                        WHERE c.quizIdx = ?;
+                  `;
+  const selectUserIdxByQuizIdxRow = await connection.query(selectUserIdxByQuizIdxQuery, quizIdx);
+  return selectUserIdxByQuizIdxRow;
+}
+
 // 게시글 등록
 async function createBoard(connection, title, userIdx, categoryIdx) {
   const boardQuery = `
@@ -269,6 +308,9 @@ module.exports = {
   selectQuizAnswer,
   selectObjectiveQuizAnswerCorrect,
   selectSubjectiveQuizAnswerCorrect,
+  userPointAfterObjectiveQuiz,
+  userPointAfterSubjectiveQuiz,
+  selectUserIdxByQuizIdx,
   createBoard,
   createQuiz,
   createObjectiveAnswer,

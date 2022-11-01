@@ -8,7 +8,7 @@ const { logger } = require('../../../config/winston');
 const secret_config = require('../../../config/secret');
 const {emit} = require("nodemon");
 const jwt = require('jsonwebtoken');
-
+const e = require("express");
 
 
 /**
@@ -58,7 +58,6 @@ exports.getBoardListByIdx = async function (req, res) {
 };
 
 
-
 /**
  * API No. 4
  * API Name : 게시글 조회수 증가 API
@@ -72,7 +71,6 @@ exports.increaseViewCount = async function (req, res) {
     const updateCountView = await boardService.updateCountView(boardIdx);
     return res.send(updateCountView)
 }
-
 
 
 /**
@@ -135,7 +133,6 @@ exports.getCategoryTitleBycategoryIdx = async function (req, res) {
 };
 
 
-
 /**
  * API No. 7
  * API Name : 각 게시글(피드) 별로 퀴즈 문제들 조회 ( + 답안 + 답안 보기도 조회 )
@@ -189,9 +186,37 @@ exports.getQuizByBoardIdx = async function (req, res) {
 };
 
 
-
 /**
  * API No. 8
+ * API Name : 퀴즈 완료 후 유저 포인트 획득 API
+ * [POST] /app/users/{userIdx}/get-points
+ */
+exports.increaseUserPoint = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { quizIdx } = req.body;
+    const viewUserIdxByQuizIdxResult = await boardProvider.viewUserIdxByQuizIdx(quizIdx);
+    const userIdxByQuizIdxResultList = await Promise.all(viewUserIdxByQuizIdxResult[0].map(async(val) => val.userIdx))
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!quizIdx) return res.send(errResponse(baseResponse.POINT_QUIZIDX_EXIST));
+        if (userIdxByQuizIdxResultList.includes(parseInt(userIdx))) {
+            return res.send(errResponse(baseResponse.USER_QUIZ_MAKER_SAME));
+        } else {
+            const updateUserPointResult = await boardService.updateUserPoint(quizIdx, userIdx);
+            return res.send(updateUserPointResult)
+        }
+    }
+}
+
+
+
+/**
+ * API No. 9
  * API Name : 게시글 등록 API
  * [POST] /app/users/{userIdx}/boards
  */
