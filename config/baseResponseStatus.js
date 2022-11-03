@@ -50,14 +50,15 @@ module.exports = {
 
     BOARD_CATEGORYIDX_NOT_EXIST : { "isSuccess": false, "code": 2030, "message": "카테고리 인덱스를 입력해 주세요." },
     BOARD_TITLE_NOT_EXIST : { "isSuccess": false, "code": 2031, "message": "게시글 제목을 입력해 주세요."  },
-    BOARD_QUIZ_STATUS_NOT_EXIST : { "isSuccess": false, "code": 2032, "message": "퀴즈 문제 분류를 입력해 주세요." },
-    BOARD_QUESTION_NOT_EXIST : { "isSuccess": false, "code": 2033, "message": "퀴즈 문제를 입력해 주세요." },
-    BOARD_HINT_NOT_EXIST : { "isSuccess": false, "code": 2034, "message": "퀴즈 힌트를 입력해 주세요." },
-    BOARD_ANSWER_SELECT_IDX_NOT_EXIST : { "isSuccess": false, "code": 2035, "message": "정답 선택 인덱스를 입력해 주세요." },
-    BOARD_ANSWER_NOT_EXIST : { "isSuccess": false, "code": 2036, "message": "정답 답안을 입력해 주세요." },
+    BOARD_QUIZ_QUESTION_NOT_EXIST : { "isSuccess": false, "code": 2032, "message": "퀴즈 문제를 입력해 주세요." },
+    BOARD_QUIZ_QUIZTYPE_NOT_EXIST : { "isSuccess": false, "code": 2033, "message": "퀴즈 타입을 입력해 주세요." },
+    BOARD_ANSWER_HINT_NOT_EXIST : { "isSuccess": false, "code": 2034, "message": "정답 힌트를 입력해 주세요." },
+    BOARD_ANSWER_SELECTIDX_NOT_EXIST : { "isSuccess": false, "code": 2035, "message": "정답 여부 선택자를 입력해 주세요." },
+    BOARD_ANSWER_ANSWER_EXIST : { "isSuccess": false, "code": 2036, "message": "정답 답안을 입력해 주세요." },
+    BOARD_QUIZIDX_NOT_EXIST : { "isSuccess": false, "code": 2037, "message": "퀴즈 인덱스가 존재하지 않습니다." },
 
-    POINT_QUIZIDX_EXIST : { "isSuccess": false, "code": 2037, "message": "퀴즈 인덱스를 입력해 주세요." },
-    USER_QUIZ_MAKER_SAME : { "isSuccess": false, "code": 2038, "message": "자기가 낸 문제는 자기가 풀 수 없습니다." },
+    POINT_QUIZIDX_EXIST : { "isSuccess": false, "code": 2038, "message": "퀴즈 인덱스를 입력해 주세요." },
+    USER_QUIZ_MAKER_SAME : { "isSuccess": false, "code": 2039, "message": "자기가 낸 문제는 자기가 풀 수 없습니다." },
 
 
 
