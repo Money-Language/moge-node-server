@@ -95,9 +95,7 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
             return res.send(errResponse(baseResponse.CATEGORY_LIST_EMPTY));
         }
         else {
-            // const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
             const feedByCategoryIdx = await boardProvider.viewFeedByCategoryIdx(categoryIdx);
-            // return res.send(response(baseResponse.SUCCESS, [categoryTitleResult[0], feedByCategoryIdx]));
             return res.send(response(baseResponse.SUCCESS,feedByCategoryIdx));
         }
     }
@@ -214,76 +212,150 @@ exports.increaseUserPoint = async function (req, res) {
 }
 
 
+/**
+ * API No. 9
+ * API Name : 게시글 등록 API
+ * [POST] /app/users/{userIdx}/board
+ */
+exports.postBoard = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { categoryIdx, title } = req.body;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
+        if (!title) return res.send(errResponse(baseResponse.BOARD_TITLE_NOT_EXIST));
+
+        const boardQuizResponse = await boardService.createBoardObjectQuiz( userIdx, categoryIdx, title );
+        return res.send(boardQuizResponse)
+    }
+}
+
 
 /**
  * API No. 9
  * API Name : 게시글 등록 API
  * [POST] /app/users/{userIdx}/boards
  */
-exports.postBoardQuiz = async function (req, res) {
+exports.postBoard = async function (req, res) {
 
     const userIdx = req.params.userIdx;
     const userIdFromJWT = req.verifiedToken.userIdx;
-
-    // const { categoryIdx, title, quizType, question, hint, answerSelectIdx, answer } = req.body;
-    const { categoryIdx, title, quizList, objectAnswerList } = req.body;
-
-    console.log(title)
-    console.log(quizList)
-    console.log(objectAnswerList)
+    const { categoryIdx, title } = req.body;
 
     if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     if (userIdFromJWT != userIdx) {
-        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG))
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
+        if (!title) return res.send(errResponse(baseResponse.BOARD_TITLE_NOT_EXIST));
+
+        const boardQuizResponse = await boardService.createBoard( userIdx, categoryIdx, title );
+        return res.send(boardQuizResponse)
     }
-    if (!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
-    if (!title) return res.send(errResponse(baseResponse.BOARD_TITLE_NOT_EXIST));
-    if (!quizType) return res.send(errResponse(baseResponse.BOARD_QUIZ_STATUS_NOT_EXIST));
-    if(!question) return res.send(errResponse(baseResponse.BOARD_QUESTION_NOT_EXIST));
-    // if(!hint) return res.send(errResponse(baseResponse.BOARD_HINT_NOT_EXIST));
-    if(!answerSelectIdx) return res.send(errResponse(baseResponse.BOARD_ANSWER_SELECT_IDX_NOT_EXIST));
-    if(!answer) return res.send(errResponse(baseResponse.BOARD_ANSWER_NOT_EXIST));
-
-    const boardQuizResponse = await boardService.createBoardQuiz(userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer);
-
-    return res.send(boardQuizResponse)
 }
 
 
+/**
+ * API No. 10
+ * API Name : 퀴즈 등록 API
+ * [POST] /app/users/{userIdx}/quiz
+ */
+exports.postQuiz = async function (req, res) {
 
-// /**
-//  * API No. 9
-//  * API Name : 게시글 등록 API
-//  * [POST] /app/users/{userIdx}/boards
-//  */
-//  exports.postBoardQuiz = async function (req, res) {
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { question, quizType, boardIdx } = req.body;
 
-//     const userIdx = req.params.userIdx;
-//     const userIdFromJWT = req.verifiedToken.userIdx;
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!question) return res.send(errResponse(baseResponse.BOARD_QUIZ_QUESTION_NOT_EXIST));
+        if (!quizType) return res.send(errResponse(baseResponse.BOARD_QUIZ_QUIZTYPE_NOT_EXIST));
+        if (!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
 
-//     // const { categoryIdx, title, quizType, question, hint, answerSelectIdx, answer } = req.body;
-//     const { categoryIdx, title, quizType, question, hint, answerSelectIdx, answer } = req.body;
+        const boardQuizResponse = await boardService.createQuiz( question, quizType, boardIdx );
+        return res.send(boardQuizResponse)
+    }
+}
 
-//     console.log(title)
-//     console.log(quizType)
-//     console.log(question);
-//     console.log(hint);
-//     console.log(answerSelectIdx);
-//     console.log(answer);
 
-//     if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
-//     if (userIdFromJWT != userIdx) {
-//         return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG))
-//     }
-//     if (!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
-//     if (!title) return res.send(errResponse(baseResponse.BOARD_TITLE_NOT_EXIST));
-//     if (!quizType) return res.send(errResponse(baseResponse.BOARD_QUIZ_STATUS_NOT_EXIST));
-//     if(!question) return res.send(errResponse(baseResponse.BOARD_QUESTION_NOT_EXIST));
-//     // if(!hint) return res.send(errResponse(baseResponse.BOARD_HINT_NOT_EXIST));
-//     if(!answerSelectIdx) return res.send(errResponse(baseResponse.BOARD_ANSWER_SELECT_IDX_NOT_EXIST));
-//     if(!answer) return res.send(errResponse(baseResponse.BOARD_ANSWER_NOT_EXIST));
+/**
+ * API No. 11
+ * API Name : 정답 등록 API
+ * [POST] /app/users/{userIdx}/answer
+ */
+exports.postAnswer = async function (req, res) {
 
-//     const boardQuizResponse = await boardService.createBoardQuiz(userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer);
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { hint, answerSelectIdx, answer, quizIdx } = req.body;
 
-//     return res.send(boardQuizResponse)
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!hint) return res.send(errResponse(baseResponse.BOARD_ANSWER_HINT_NOT_EXIST));
+        if (!answerSelectIdx) return res.send(errResponse(baseResponse.BOARD_ANSWER_SELECTIDX_NOT_EXIST));
+        if (!answer) return res.send(errResponse(baseResponse.BOARD_ANSWER_ANSWER_EXIST));
+        if (!quizIdx) return res.send(errResponse(baseResponse.BOARD_QUIZIDX_NOT_EXIST));
+
+        const boardQuizResponse = await boardService.createAnswer( hint, answerSelectIdx, answer, quizIdx );
+        return res.send(boardQuizResponse)
+    }
+}
+
+
+/**
+ * API No. 10
+ * API Name : 게시글 + 주관식 퀴즈 등록 API
+ * [POST] /app/users/{userIdx}/subjective-quiz
+ */
+// exports.postBoardSubjectiveQuiz = async function (req, res) {
+
+    // const userIdx = req.params.userIdx;
+    // const userIdFromJWT = req.verifiedToken.userIdx;
+    // const { categoryIdx, title, quizList } = req.body;
+
+    // const question = await Promise.all(quizList.map(async(val) => val.question))
+    // const quizType = await Promise.all(quizList.map(async(val) => val.quizType))
+
+    // const answerList = await Promise.all(quizList.map(async(val) => val.answerList))
+    // const hint = await Promise.all(answerList.map(async(val) => val.hint))
+    // const answerSelectIdx = await Promise.all(answerList.map(async(val) => val.answerSelectIdx))
+    // const answer = await Promise.all(answerList.map(async(val) => val.answer))
+
+    // if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    // if (userIdFromJWT != userIdx) {
+    //     return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG))
+    // } else {
+    //     if (!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
+    //     if (!title) return res.send(errResponse(baseResponse.BOARD_TITLE_NOT_EXIST));
+    //     if (!question) return res.send(errResponse(baseResponse.BOARD_QUIZ_QUESTION_NOT_EXIST));
+    //     if (!quizType) return res.send(errResponse(baseResponse.BOARD_QUIZ_QUIZTYPE_NOT_EXIST));
+    //     if (!hint) return res.send(errResponse(baseResponse.BOARD_ANSWER_HINT_NOT_EXIST));
+    //     if (!answerSelectIdx) return res.send(errResponse(baseResponse.BOARD_ANSWER_SELECTIDX_NOT_EXIST));
+    //     if (!answer) return res.send(errResponse(baseResponse.BOARD_ANSWER_ANSWER_EXIST));
+
+        // for (i = 0; i < answerList.length; i++) {
+        //     const hint = await Promise.all(answerList[i].map((val) => val.hint));
+        //     const answerSelectIdx = await Promise.all(answerList[i].map(async(val) => val.answerSelectIdx));
+        //     const answer = await Promise.all(answerList[i].map(async(val) => val.answer));
+
+        //     if (!hint) return res.send(errResponse(baseResponse.BOARD_ANSWER_HINT_NOT_EXIST));
+        //     if (!answerSelectIdx) return res.send(errResponse(baseResponse.BOARD_ANSWER_SELECTIDX_NOT_EXIST));
+        //     if (!answer) return res.send(errResponse(baseResponse.BOARD_ANSWER_ANSWER_EXIST));
+
+        //     const boardQuizResponse = await boardService.createBoardObjectQuiz( userIdx, categoryIdx, title, question, quizType, hint, answerSelectIdx, answer );
+        //     return res.send(boardQuizResponse)
+        // }
+
+    //     const boardQuizResponse = await boardService.createBoardQuiz( userIdx, categoryIdx, title, question, quizType, hint, answerSelectIdx, answer );
+    //     return res.send(boardQuizResponse)
+    // }
 // }

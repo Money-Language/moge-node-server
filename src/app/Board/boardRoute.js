@@ -23,11 +23,14 @@ module.exports = function(app){
     // 8. 퀴즈 완료 후 유저 포인트 획득 API
     app.post('/app/users/:userIdx/get-points', jwtMiddleware, board.increaseUserPoint);
 
-    // // 8. 객관식 퀴즈 등록
-    // app.post('/app/users/:userIdx/boards', jwtMiddleware, board.postBoardQuiz);
+    // 9. 게시글 등록
+    app.post('/app/users/:userIdx/boards', jwtMiddleware, board.postBoard);
 
-    // // 8. 객관식 퀴즈 등록
-    // app.post('/app/users/:userIdx/boards', jwtMiddleware, board.postBoardQuiz);
+    // 10. 퀴즈 등록
+    app.post('/app/users/:userIdx/quiz', jwtMiddleware, board.postQuiz);
+
+    // 11. 정답 등록
+    app.post('/app/users/:userIdx/answer', jwtMiddleware, board.postAnswer);
 
 };
 

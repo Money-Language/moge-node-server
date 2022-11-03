@@ -51,70 +51,135 @@ exports.updateUserPoint = async function (quizIdx, userIdx) {
     }
 }
 
-// // 게시글 + 퀴즈 + 객관식/주관식 정답 등록
-// exports.createBoardQuiz = async ( title, userIdx, categoryIdx, quizType, question, hint, answerSelectIdx, answer ) => {
+// // 게시글 + 퀴즈 + 객관식 정답 등록
+// exports.createBoardObjectQuiz = async ( userIdx, categoryIdx, title, question, quizType, hint, answerSelectIdx, answer ) => {
+//     const connection = await pool.getConnection(async (conn) => conn);
 //     try {
-//         const connection = await pool.getConnection(async (conn) => (conn));
+//         await connection.beginTransaction();
 //         const createBoardResponse = await boardDao.createBoard(connection, title, userIdx, categoryIdx);
 //         const boardIdx = createBoardResponse.insertId
+//         console.log(boardIdx)  
+//         for (let quizIter of (question || quizType)) {
+//             console.log(quizIter);
+//             // const createQuizResponse = await boardDao.createQuiz(connection, quizIter, boardIdx);
+//             // const quizIdx = createQuizResponse.insertId;
+//             // console.log(`추가된 퀴즈 문제 인덱스 번호 : ${createQuizResponse.insertId}`);
 
-//         for (let quizIter of question) {
-//             const createQuizResponse = await boardDao.createQuiz(connection, quizIter, quizType, boardIdx);
-//             const quizIdx = createQuizResponse.insertId
-//             console.log(`추가된 퀴즈 문제 인덱스 번호 : ${createQuizResponse.insertId}`);
-
-//             if (quizType == "객관식") {
-//                 for (objectiveIter of answer) {
-//                     const createObjectiveAnswerResponse = await boardDao.createObjectiveAnswer(connection, objectiveIter, answerSelectIdx, quizIdx);
-//                     console.log(`추가된 객관식 정답 인덱스 번호 : ${createObjectiveAnswerResponse.insertId}`);
-//                 }
-//             } else {
-//                 for (subjectiveIter of answer) {
-//                     const createSubjectiveAnswerResponse = await boardDao.createSubjectiveAnswer(connection, hint, answerSelectIdx, subjectiveIter, quizIdx);
-//                     console.log(`추가된 주관식 정답 인덱스 번호 : ${createSubjectiveAnswerResponse.insertId}`);
-//                 }
-//             }
+//             // for (objectiveIter of answer) {
+//             //     const createObjectiveAnswerResponse = await boardDao.createObjectiveAnswer(connection, objectiveIter, answerSelectIdx, quizIdx);
+//             //     console.log(`추가된 객관식 정답 인덱스 번호 : ${createObjectiveAnswerResponse.insertId}`);
+//             // }
+            
 //         }
-//         const result = { userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer }
-//         connection.release();
-//         return response(baseResponse.SUCCESS, result)
+//         // const result = { userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer }
+//         // await connection.commit();
+//         // return response(baseResponse.SUCCESS, result)
 //     } catch (err) {
+//         await connection.rollback();
 //         logger.error(`App - createBoardQuiz Service error\n: ${err.message}`);
 //         return errResponse(baseResponse.DB_ERROR);
+//     } finally {
+//         connection.release();
 //     }
 // }
 
 
-// 게시글 + 퀴즈 + 객관식/주관식 정답 등록
-exports.createBoardQuiz = async ( title, userIdx, categoryIdx, quizType, question, answer, answerSelectIdx ) => {
+// 게시글 등록
+exports.createBoard = async ( userIdx, categoryIdx, title ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
     try {
-        const connection = await pool.getConnection(async (conn) => (conn));
+        await connection.beginTransaction();
         const createBoardResponse = await boardDao.createBoard(connection, title, userIdx, categoryIdx);
-        const boardIdx = createBoardResponse.insertId
-        console.log("삽입된 게시글 인덱스 번호 : " , boardIdx)
+        const boardIdx = createBoardResponse.insertId;
 
-        for (let quizIter of question) {
-            const createQuizResponse = await boardDao.createQuiz(connection, quizIter, quizType, boardIdx);
-            const quizIdx = createQuizResponse.insertId
-            console.log(`추가된 퀴즈 문제 인덱스 번호 : ${createQuizResponse.insertId}`);
-
-            if (quizType == "객관식") {
-                for (objectiveIter of answer) {
-                    const createObjectiveAnswerResponse = await boardDao.createObjectiveAnswer(connection, objectiveIter, answerSelectIdx, quizIdx);
-                    console.log(`추가된 객관식 정답 인덱스 번호 : ${createObjectiveAnswerResponse.insertId}`);
-                }
-            } else {
-                for (subjectiveIter of answer) {
-                    const createSubjectiveAnswerResponse = await boardDao.createSubjectiveAnswer(connection, hint, answerSelectIdx, subjectiveIter, quizIdx);
-                    console.log(`추가된 주관식 정답 인덱스 번호 : ${createSubjectiveAnswerResponse.insertId}`);
-                }
-            }
-        }
-        const result = { userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer }
-        connection.release();
+        const result = { boardIdx, title, userIdx, categoryIdx }
+        await connection.commit();
         return response(baseResponse.SUCCESS, result)
     } catch (err) {
-        logger.error(`App - createBoardQuiz Service error\n: ${err.message}`);
+        await connection.rollback();
+        logger.error(`App - createBoard Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
     }
 }
+
+
+// 퀴즈 등록
+exports.createQuiz = async ( question, quizType, boardIdx ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        const createQuizResponse = await boardDao.createQuiz(connection, question, quizType, boardIdx);
+        const quizIdx = createQuizResponse.insertId;
+
+        const result = { question, quizType, boardIdx, quizIdx }
+        await connection.commit();
+        return response(baseResponse.SUCCESS, result)
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - createQuiz Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+
+// 정답 등록
+exports.createAnswer = async ( hint, answerSelectIdx, answer, quizIdx ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        if (hint == "OBJECTIVE") {
+            await connection.beginTransaction();
+            const createObjectAnswerResponse = await boardDao.createObjectiveAnswer(connection, answer, answerSelectIdx, quizIdx);
+            const result = { answer, answerSelectIdx, quizIdx }
+            await connection.commit();
+            return response(baseResponse.SUCCESS, result)
+        } else {
+            await connection.beginTransaction();
+            const createSubjectAnswerResponse = await boardDao.createSubjectiveAnswer(connection, hint, answerSelectIdx, answer, quizIdx);
+            const result = { hint, answerSelectIdx, answer, quizIdx }
+            await connection.commit();
+            return response(baseResponse.SUCCESS, result)
+        }
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - createBoardQuiz Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+
+// // 게시글 등록
+// exports.createBoardObjectQuiz = async ( userIdx, categoryIdx, title ) => {
+//     const connection = await pool.getConnection(async (conn) => conn);
+//     try {
+//         await connection.beginTransaction();
+//         const createBoardResponse = await boardDao.createBoard(connection, title, userIdx, categoryIdx);
+//         const boardIdx = createBoardResponse.insertId
+//         console.log(boardIdx)  
+//         for (let quizIter of (question || quizType)) {
+//             console.log(quizIter);
+//             // const createQuizResponse = await boardDao.createQuiz(connection, quizIter, boardIdx);
+//             // const quizIdx = createQuizResponse.insertId;
+//             // console.log(`추가된 퀴즈 문제 인덱스 번호 : ${createQuizResponse.insertId}`);
+
+//             // for (objectiveIter of answer) {
+//             //     const createObjectiveAnswerResponse = await boardDao.createObjectiveAnswer(connection, objectiveIter, answerSelectIdx, quizIdx);
+//             //     console.log(`추가된 객관식 정답 인덱스 번호 : ${createObjectiveAnswerResponse.insertId}`);
+//             // }
+//         }
+//         // const result = { userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer }
+//         // await connection.commit();
+//         // return response(baseResponse.SUCCESS, result)
+//     } catch (err) {
+//         await connection.rollback();
+//         logger.error(`App - createBoardQuiz Service error\n: ${err.message}`);
+//         return errResponse(baseResponse.DB_ERROR);
+//     } finally {
+//         connection.release();
+//     }
+// }
