@@ -14,7 +14,7 @@ async function selectUserFeed(connection, userIdx) {
                     LEFT JOIN Category d on b.categoryIdx = d.categoryIdx
                     LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
                     LEFT JOIN Comment f on b.boardIdx = f.boardIdx
-                    WHERE a.userIdx = ?
+                    WHERE a.userIdx = ? AND b.status = 'ACTIVE'
                     GROUP BY b.boardIdx;
                 `;
   const [userFeedRow] = await connection.query(selectUserFeedQuery, userIdx);
@@ -37,7 +37,7 @@ async function selectUserCategoryFeed(connection, userIdx, categoryName) {
                     LEFT JOIN Category d on b.categoryIdx = d.categoryIdx
                     LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
                     LEFT JOIN Comment f on b.boardIdx = f.boardIdx
-                    WHERE a.userIdx = ? AND d.categoryName = ?
+                    WHERE a.userIdx = ? AND d.categoryName = ? AND b.status = 'ACTIVE'
                     GROUP BY b.boardIdx;
                 `;
   const [userCategoryFeedRow] = await connection.query(selectUserCategoryFeedQuery, [userIdx, categoryName]);
@@ -131,7 +131,7 @@ async function selectCategoryFeed(connection, categoryIdx) {
                         LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
                         LEFT JOIN Category d on b.categoryIdx = d.categoryIdx
                         LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
-                        WHERE d.categoryIdx = ?
+                        WHERE d.categoryIdx = ? AND b.status = 'ACTIVE'
                         GROUP BY b.boardIdx;
                 `;
   const [categoryFeedRow] = await connection.query(selectCategoryFeedQuery, categoryIdx);
