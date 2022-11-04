@@ -71,7 +71,7 @@ module.exports = {
     SIGNIN_INACTIVE_ACCOUNT : { "isSuccess": false, "code": 3005, "message": "비활성화 된 계정입니다. 고객센터에 문의해주세요." },
     SIGNIN_WITHDRAWAL_ACCOUNT : { "isSuccess": false, "code": 3006, "message": "탈퇴 된 계정입니다. 고객센터에 문의해주세요." },
 
-    SUBJECTIVE_ANSWERSELECTIDX_NOT_EXIST : { "isSuccess": false, "code": 3009, "message": "주관식 정답에는 answerSelected가 01 고정입니다." },
+    SUBJECTIVE_ANSWERSELECTIDX_NOT_EXIST : { "isSuccess": false, "code": 3009, "message": "주관식 정답에는 answerSelected가 1이 고정입니다." },
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
