@@ -26,6 +26,7 @@ exports.updateCountView = async function (boardIdx) {
     }
 }
 
+
 // 퀴즈 완료 후 유저 포인트 획득
 exports.updateUserPoint = async function (quizIdx, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -33,7 +34,8 @@ exports.updateUserPoint = async function (quizIdx, userIdx) {
         await connection.beginTransaction();
         const quizTypeByIdxResult = await boardDao.selectQuizTypeByQuizIdx(connection, quizIdx);
         const quizTypeByIdxList = await Promise.all(quizTypeByIdxResult.map(async(val) => val.quizType))
-        if (quizTypeByIdxList == "객관식") {
+
+        if (quizTypeByIdxList == 0) {
             const updateUserPointToObjectiveResult = await boardDao.userPointAfterObjectiveQuiz(connection, quizIdx, userIdx)
             await connection.commit();
             return response(baseResponse.SUCCESS, updateUserPointToObjectiveResult);
@@ -50,38 +52,6 @@ exports.updateUserPoint = async function (quizIdx, userIdx) {
         connection.release();
     }
 }
-
-// // 게시글 + 퀴즈 + 객관식 정답 등록
-// exports.createBoardObjectQuiz = async ( userIdx, categoryIdx, title, question, quizType, hint, answerSelectIdx, answer ) => {
-//     const connection = await pool.getConnection(async (conn) => conn);
-//     try {
-//         await connection.beginTransaction();
-//         const createBoardResponse = await boardDao.createBoard(connection, title, userIdx, categoryIdx);
-//         const boardIdx = createBoardResponse.insertId
-//         console.log(boardIdx)  
-//         for (let quizIter of (question || quizType)) {
-//             console.log(quizIter);
-//             // const createQuizResponse = await boardDao.createQuiz(connection, quizIter, boardIdx);
-//             // const quizIdx = createQuizResponse.insertId;
-//             // console.log(`추가된 퀴즈 문제 인덱스 번호 : ${createQuizResponse.insertId}`);
-
-//             // for (objectiveIter of answer) {
-//             //     const createObjectiveAnswerResponse = await boardDao.createObjectiveAnswer(connection, objectiveIter, answerSelectIdx, quizIdx);
-//             //     console.log(`추가된 객관식 정답 인덱스 번호 : ${createObjectiveAnswerResponse.insertId}`);
-//             // }
-            
-//         }
-//         // const result = { userIdx, categoryIdx, title, quizType, question, hint, answerSelectIdx, answer }
-//         // await connection.commit();
-//         // return response(baseResponse.SUCCESS, result)
-//     } catch (err) {
-//         await connection.rollback();
-//         logger.error(`App - createBoardQuiz Service error\n: ${err.message}`);
-//         return errResponse(baseResponse.DB_ERROR);
-//     } finally {
-//         connection.release();
-//     }
-// }
 
 
 // 게시글 등록
@@ -127,25 +97,25 @@ exports.createQuiz = async ( question, quizType, boardIdx ) => {
 
 
 // 정답 등록
-exports.createAnswer = async ( hint, answerSelectIdx, answer, quizIdx ) => {
+exports.createAnswer = async ( hint, content, isAnswer, quizIdx ) => {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         if (hint == "OBJECTIVE") {
             await connection.beginTransaction();
-            const createObjectAnswerResponse = await boardDao.createObjectiveAnswer(connection, answer, answerSelectIdx, quizIdx);
-            const result = { answer, answerSelectIdx, quizIdx }
+            const createObjectAnswerResponse = await boardDao.createObjectiveAnswer(connection, content, isAnswer, quizIdx);
+            const result = { content, isAnswer, quizIdx }
             await connection.commit();
             return response(baseResponse.SUCCESS, result)
         } else {
             await connection.beginTransaction();
-            const createSubjectAnswerResponse = await boardDao.createSubjectiveAnswer(connection, hint, answerSelectIdx, answer, quizIdx);
-            const result = { hint, answerSelectIdx, answer, quizIdx }
+            const createSubjectAnswerResponse = await boardDao.createSubjectiveAnswer(connection, hint, content, isAnswer, quizIdx);
+            const result = { hint, content, isAnswer, quizIdx }
             await connection.commit();
             return response(baseResponse.SUCCESS, result)
         }
     } catch (err) {
         await connection.rollback();
-        logger.error(`App - createBoardQuiz Service error\n: ${err.message}`);
+        logger.error(`App - createAnswer Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);
     } finally {
         connection.release();
