@@ -51,6 +51,15 @@ exports.nicknameCheck = async function (nickname) {
   return nicknameCheckResult;
 };
 
+// 소셜로그인 고유 ID 중복 확인
+exports.socialCreatedIDCheck = async function (socialCreatedID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const socialCreatedIDCheckResult = await userDao.selectUserSocialAccount(connection, socialCreatedID);
+  connection.release();
+
+  return socialCreatedIDCheckResult;
+};
+
 // 비밀번호 확인
 exports.passwordCheck = async function (selectUserPasswordParams) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -69,4 +78,13 @@ exports.accountCheck = async function (email) {
   connection.release();
 
   return userAccountResult;
+};
+
+// 사용자 소셜로그인 게정 상태 체크
+exports.accountSocialCheck = async function (socialCreatedID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const accountSocialUserResult = await userDao.selectUserSocialAccount(connection, socialCreatedID);
+  connection.release();
+
+  return accountSocialUserResult;
 };

@@ -46,11 +46,12 @@ exports.loginKakao = async function (req, res) {
 
         const email = kakao_profile.data.kakao_account.email;
         const profileUrl = kakao_profile.data.kakao_account.profile.profile_image_url;
-        const emailRows = await userProvider.emailCheck(email);
+        const socialCreatedID = kakao_profile.data.id;
+        const socialIDRows = await userProvider.socialCreatedIDCheck(socialCreatedID);
 
-        // 이메일이 존재하는 경우 = 회원가입 되어 있는 경우 -> 로그인 처리
-        if (emailRows.length > 0) {
-            const userInfoRows = await userProvider.accountCheck(email);
+        // 소셜로그인 고유 ID가 존재하는 경우 = 회원가입 되어 있는 경우 -> 로그인 처리
+        if (socialIDRows.length > 0) {
+            const userInfoRows = await userProvider.accountSocialCheck(socialCreatedID);
             const token = await jwt.sign(
                 {
                     userIdx: userInfoRows[0].userIdx,
@@ -64,10 +65,10 @@ exports.loginKakao = async function (req, res) {
             const result = { userIdx: userInfoRows[0].userIdx, jwt: token };
             return res.send(response(baseResponse.SUCCESS, result));
 
-        // 이메일이 존재하지 않는 경우 -> 회원가입 처리
+        // 소셜로그인 고유 ID가 존재하지 않는 경우 -> 회원가입 처리
         } else {
             if(!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
-            const signUpResponse = await userService.createSocialUser(email, name, profileUrl, 'KAKAO');
+            const signUpResponse = await userService.createSocialUser(email, name, profileUrl, socialCreatedID, 'KAKAO');
             return res.send(signUpResponse);
         }
     } catch (err) {
@@ -102,11 +103,12 @@ exports.loginNaver = async function (req, res) {
 
         const email = naver_profile.data.response.email;
         const profileUrl = naver_profile.data.response.profile_image;
-        const emailRows = await userProvider.emailCheck(email);
+        const socialCreatedID = naver_profile.data.response.id;
+        const socialIDRows = await userProvider.socialCreatedIDCheck(socialCreatedID);
 
-        // 이메일이 존재하는 경우 = 회원가입 되어 있는 경우 -> 로그인 처리
-        if (emailRows.length > 0) {
-            const userInfoRows = await userProvider.accountCheck(email);
+        // 소셜로그인 고유 ID가 존재하는 경우 = 회원가입 되어 있는 경우 -> 로그인 처리
+        if (socialIDRows.length > 0) {
+            const userInfoRows = await userProvider.accountSocialCheck(socialCreatedID);
             const token = await jwt.sign(
                 {
                     userIdx: userInfoRows[0].userIdx,
@@ -120,10 +122,10 @@ exports.loginNaver = async function (req, res) {
             const result = { userIdx: userInfoRows[0].userIdx, jwt: token };
             return res.send(response(baseResponse.SUCCESS, result));
 
-        // 이메일이 존재하지 않는 경우 -> 회원가입 처리
+        // 소셜로그인 고유 ID가 존재하지 않는 경우 -> 회원가입 처리
         } else {
             if(!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
-            const signUpResponse = await userService.createSocialUser(email, name, profileUrl, 'NAVER');
+            const signUpResponse = await userService.createSocialUser(email, name, profileUrl, socialCreatedID, 'NAVER');
             return res.send(signUpResponse);
         }
     } catch (err) {

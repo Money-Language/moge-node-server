@@ -41,6 +41,17 @@ async function selectUserNickName(connection, nickname) {
   return nicknameRows;
 }
 
+// 소셜로그인 고유 ID로 회원 조회
+async function selectUserSocialCreatedID(connection, socialCreatedID) {
+  const selectUserSocialCreatedIDQuery = `
+                  SELECT email, nickname, socialCreatedID
+                  FROM User 
+                  WHERE socialCreatedID = ?;
+                `;
+  const [selectUserSocialCreatedIDRows] = await connection.query(selectUserSocialCreatedIDQuery, socialCreatedID);
+  return selectUserSocialCreatedIDRows;
+}
+
 // 유저 생성
 async function insertUserInfo(connection, insertUserInfoParams) {
   const insertUserInfoQuery = `
@@ -82,11 +93,25 @@ async function selectUserAccount(connection, email) {
   return selectUserAccountRow[0];
 }
 
+// 소셜로그인 계정 상태 체크 (jwt 생성 위해 id 값도 가져온다.)
+async function selectUserSocialAccount(connection, socialCreatedID) {
+  const selectUserSocialAccountQuery = `
+          SELECT status, userIdx
+          FROM User
+          WHERE socialCreatedID = ?;
+        `;
+  const selectUserSocialAccountRow = await connection.query(
+    selectUserSocialAccountQuery,
+    socialCreatedID
+  );
+  return selectUserSocialAccountRow[0];
+}
+
 // 소셜 로그인 유저 생성
 async function insertSocialUser(connection, insertUserParams) {
   const insertUserQuery = `
-    INSERT INTO User(email, nickname, profileImage, status)
-    VALUES (?, ?, ?, ?);
+    INSERT INTO User(email, nickname, profileImage, socialCreatedID, status)
+    VALUES (?, ?, ?, ?, ?);
   `;
   const insertUserRow = await connection.query(insertUserQuery, insertUserParams);
   return insertUserRow;
@@ -98,8 +123,10 @@ module.exports = {
   selectUserEmail,
   selectUserId,
   selectUserNickName,
+  selectUserSocialCreatedID,
   insertUserInfo,
   selectUserPassword,
   selectUserAccount,
+  selectUserSocialAccount,
   insertSocialUser
 };
