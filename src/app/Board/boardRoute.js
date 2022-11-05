@@ -15,7 +15,7 @@ module.exports = function(app){
     app.get('/app/boards/:categoryIdx', board.getBoardListBycategoryIdx);
 
     // 6. 각 카테고리 별로 카테고리 이름, 서브타이틀 조회
-    app.get('/app/boards/category-name/:categoryIdx', board.getCategoryTitleBycategoryIdx);
+    app.get('/app/boards/:categoryIdx/category-name', board.getCategoryTitleBycategoryIdx);
 
     // 7. 각 게시글 별로 퀴즈 문제들 조회 ( + 퀴즈의 답안 조회 )
     app.get('/app/boards/:boardIdx/quiz', board.getQuizByBoardIdx);

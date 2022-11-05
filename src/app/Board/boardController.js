@@ -105,7 +105,7 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
 /**
  * API No. 6
  * API Name : 각 카테고리 별로 카테고리 이름, 서브타이틀 조회
- * [GET] /app/boards/category-name/{categoryIdx}
+ * [GET] /app/boards/{categoryIdx}/category-name
  */
 exports.getCategoryTitleBycategoryIdx = async function (req, res) {
     /**
