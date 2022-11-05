@@ -65,13 +65,21 @@ module.exports = function(app){
     // 0. 테스트 API
     app.get('/app/test', user.getTest)
 
-    // 1. 카카오 소셜 로그인 API
+    // 1. 카카오 소셜 회원가입 API
+    app.post('/app/users/sign-up/kakao', user.signUpKakao);
+
+    // 12. 카카오 로그인 API
     app.post('/app/users/login/kakao', user.loginKakao);
+
     // 1-1. 카카오 Access 토큰 발급 Url
     app.get('/auth/kakao/callback', passport.authenticate('kakao-login', { failureRedirect: '/auth', successRedirect: '/' }));
 
-    // 2. 네이버 소셜 로그인 API
+    // 2. 네이버 소셜 회원가입 API
+    app.post('/app/users/sign-up/naver', user.signUpNaver);
+
+    // 13. 네이버 로그인 API
     app.post('/app/users/login/naver', user.loginNaver);
+
     // 2-1. 네이버 Access 토큰 발급 Url
     app.get('/auth/naver/callback', passport.authenticate('naver-login', { failureRedirect: '/auth', successRedirect: '/' }));
 

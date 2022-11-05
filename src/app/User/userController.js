@@ -24,10 +24,10 @@ exports.getTest = async function (req, res) {
 
 /**
  * API No. 1
- * API Name : 카카오 로그인
- * [POST] /app/users/login/kakao
+ * API Name : 카카오 소셜 회원가입 API
+ * [POST] /app/users/sign-up/kakao
  */
-exports.loginKakao = async function (req, res) {
+exports.signUpKakao = async function (req, res) {
     const accessToken = req.body.accessToken;
     const name = req.body.nickname;
     try {
@@ -47,9 +47,44 @@ exports.loginKakao = async function (req, res) {
         const email = kakao_profile.data.kakao_account.email;
         const profileUrl = kakao_profile.data.kakao_account.profile.profile_image_url;
         const socialCreatedID = kakao_profile.data.id;
+
+        if (!accessToken) return res.send(errResponse(baseResponse.ACCESS_TOKEN_EMPTY))
+        if (!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
+        const signUpResponse = await userService.createSocialUser(email, name, profileUrl, socialCreatedID, 'KAKAO');
+        return res.send(signUpResponse);
+
+    } catch (err) {
+        logger.error(`App - signUpKakao Query error\n: ${JSON.stringify(err)}`);
+        return res.send(errResponse(baseResponse.USER_INFO_EMPTY));
+    }
+};
+
+
+
+/**
+ * API No. 12
+ * API Name : 카카오 로그인 API
+ * [POST] /app/users/login/kakao
+ */
+exports.loginKakao = async function (req, res) {
+    const accessToken = req.body.accessToken;
+    try {
+        let kakao_profile;
+        try {
+            kakao_profile = await axios.get('https://kapi.kakao.com/v2/user/me', {
+                headers: {
+                    Authorization: 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json',
+                },
+            });
+        } catch (err) {
+            logger.error(`Can't get kakao profile\n: ${JSON.stringify(err)}`);
+            return res.send(errResponse(baseResponse.USER_ACCESS_TOKEN_WRONG));
+        }
+
+        const socialCreatedID = kakao_profile.data.id;
         const socialIDRows = await userProvider.socialCreatedIDCheck(socialCreatedID);
 
-        // 소셜로그인 고유 ID가 존재하는 경우 = 회원가입 되어 있는 경우 -> 로그인 처리
         if (socialIDRows.length > 0) {
             const userInfoRows = await userProvider.accountSocialCheck(socialCreatedID);
             const token = await jwt.sign(
@@ -62,17 +97,14 @@ exports.loginKakao = async function (req, res) {
                     subject: 'userId',
                 },
             );
+            if (!accessToken) return res.send(errResponse(baseResponse.ACCESS_TOKEN_EMPTY))
             const result = { userIdx: userInfoRows[0].userIdx, jwt: token };
             return res.send(response(baseResponse.SUCCESS, result));
-
-        // 소셜로그인 고유 ID가 존재하지 않는 경우 -> 회원가입 처리
         } else {
-            if(!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
-            const signUpResponse = await userService.createSocialUser(email, name, profileUrl, socialCreatedID, 'KAKAO');
-            return res.send(signUpResponse);
+            return res.send(errResponse(baseResponse.USER_SOCIAL_ID_NOT_EXIST));
         }
     } catch (err) {
-        logger.error(`App - logInKakao Query error\n: ${JSON.stringify(err)}`);
+        logger.error(`App - loginKakao Query error\n: ${JSON.stringify(err)}`);
         return res.send(errResponse(baseResponse.USER_INFO_EMPTY));
     }
 };
@@ -81,10 +113,10 @@ exports.loginKakao = async function (req, res) {
 
 /**
  * API No. 2
- * API Name : 네이버 로그인
- * [POST] /app/users/login/naver
+ * API Name : 네이버 소셜 회원가입 API
+ * [POST] /app/users/sign-up/naver
  */
-exports.loginNaver = async function (req, res) {
+exports.signUpNaver = async function (req, res) {
     const accessToken = req.body.accessToken;
     const name = req.body.nickname;
     try {
@@ -104,9 +136,44 @@ exports.loginNaver = async function (req, res) {
         const email = naver_profile.data.response.email;
         const profileUrl = naver_profile.data.response.profile_image;
         const socialCreatedID = naver_profile.data.response.id;
+
+        if (!accessToken) return res.send(errResponse(baseResponse.ACCESS_TOKEN_EMPTY))
+        if (!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
+        const signUpResponse = await userService.createSocialUser(email, name, profileUrl, socialCreatedID, 'NAVER');
+        return res.send(signUpResponse);
+
+    } catch (err) {
+        logger.error(`App - signUpNaver Query error\n: ${JSON.stringify(err)}`);
+        return res.send(errResponse(baseResponse.USER_INFO_EMPTY));
+    }
+};
+
+
+
+/**
+ * API No. 13
+ * API Name : 네이버 로그인 API
+ * [POST] /app/users/login/naver
+ */
+exports.loginNaver = async function (req, res) {
+    const accessToken = req.body.accessToken;
+    try {
+        let naver_profile;
+        try {
+            naver_profile = await axios.get('https://openapi.naver.com/v1/nid/me', {
+                headers: {
+                    Authorization: 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json',
+                },
+            });
+        } catch (err) {
+            logger.error(`Can't get naver profile\n: ${JSON.stringify(err)}`);
+            return res.send(errResponse(baseResponse.USER_ACCESS_TOKEN_WRONG));
+        }
+
+        const socialCreatedID = naver_profile.data.response.id;
         const socialIDRows = await userProvider.socialCreatedIDCheck(socialCreatedID);
 
-        // 소셜로그인 고유 ID가 존재하는 경우 = 회원가입 되어 있는 경우 -> 로그인 처리
         if (socialIDRows.length > 0) {
             const userInfoRows = await userProvider.accountSocialCheck(socialCreatedID);
             const token = await jwt.sign(
@@ -119,17 +186,14 @@ exports.loginNaver = async function (req, res) {
                     subject: 'userId',
                 },
             );
+            if (!accessToken) return res.send(errResponse(baseResponse.ACCESS_TOKEN_EMPTY))
             const result = { userIdx: userInfoRows[0].userIdx, jwt: token };
             return res.send(response(baseResponse.SUCCESS, result));
-
-        // 소셜로그인 고유 ID가 존재하지 않는 경우 -> 회원가입 처리
         } else {
-            if(!name) return res.send(errResponse(baseResponse.SIGNUP_NICKNAME_EMPTY))
-            const signUpResponse = await userService.createSocialUser(email, name, profileUrl, socialCreatedID, 'NAVER');
-            return res.send(signUpResponse);
+            return res.send(errResponse(baseResponse.USER_SOCIAL_ID_NOT_EXIST));
         }
     } catch (err) {
-        logger.error(`App - logInNaver Query error\n: ${JSON.stringify(err)}`);
+        logger.error(`App - loginNaver Query error\n: ${JSON.stringify(err)}`);
         return res.send(errResponse(baseResponse.USER_INFO_EMPTY));
     }
 };

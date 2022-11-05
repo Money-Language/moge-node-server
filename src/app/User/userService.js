@@ -70,6 +70,10 @@ exports.postSignIn = async function (email, password) {
 // 소셜 계정 회원 가입
 exports.createSocialUser = async function (email, nickname, profileImage, socialCreatedID, status) {
     try {
+        // 이메일 중복 확인
+        const emailRows = await userProvider.emailCheck(email);
+        if (emailRows.length > 0) return errResponse(baseResponse.SIGNUP_REDUNDANT_EMAIL);
+
         // 닉네임 중복 확인
         const nicknameRows = await userProvider.nicknameCheck(nickname);
         if (nicknameRows.length > 0) return errResponse(baseResponse.SIGNUP_REDUNDANT_NICKNAME);
@@ -77,10 +81,7 @@ exports.createSocialUser = async function (email, nickname, profileImage, social
         const insertKakaoUserInfoParams = [email, nickname, profileImage, socialCreatedID, status];
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const userIdResult = await userDao.insertSocialUser(
-            connection,
-            insertKakaoUserInfoParams,
-        );
+        const userIdResult = await userDao.insertSocialUser(connection, insertKakaoUserInfoParams);
 
         const result = {
             email: email,
