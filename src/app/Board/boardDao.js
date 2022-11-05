@@ -125,12 +125,14 @@ async function selectCategoryFeed(connection, categoryIdx) {
                                 b.title,
                                 COUNT(distinct c.quizIdx) AS 'quizCount',
                                 b.viewCount,
-                                COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount'
+                                COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount',
+                                COUNT(distinct (case when f.status='ACTIVE' then f.commentIdx end)) AS 'commentCount'
                         FROM User a
                         LEFT JOIN Board b on a.userIdx = b.userIdx
                         LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
                         LEFT JOIN Category d on b.categoryIdx = d.categoryIdx
                         LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
+                        LEFT JOIN Comment f on b.boardIdx = f.boardIdx
                         WHERE d.categoryIdx = ? AND b.status = 'ACTIVE'
                         GROUP BY b.boardIdx;
                 `;
