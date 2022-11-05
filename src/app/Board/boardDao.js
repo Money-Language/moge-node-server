@@ -175,9 +175,9 @@ async function selectBoardQuiz(connection, boardIdx) {
 async function selectQuizAnswer(connection, boardIdx, quizIdx) {
   const selectQuizAnswerQuery = `
                       SELECT a.quizIdx,
-                        IF (a.quizType = 0, (b.content), (c.content)) AS content,
-                        IF (a.quizType = 0, (b.isAnswer), (c.isAnswer)) AS isAnswer,
-                        IF (a.quizType = 0, 'OBJECTIVE', c.hint) AS hint
+                        IF (a.quizType = 1, (b.content), (c.content)) AS content,
+                        IF (a.quizType = 1, (b.isAnswer), (c.isAnswer)) AS isAnswer,
+                        IF (a.quizType = 1, 'OBJECTIVE', c.hint) AS hint
                       FROM Quiz a
                       LEFT JOIN ObjectiveAnswer b on a.quizIdx = b.quizIdx
                       LEFT JOIN SubjectiveAnswer c on a.quizIdx = c.quizIdx

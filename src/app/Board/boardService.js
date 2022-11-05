@@ -35,7 +35,7 @@ exports.updateUserPoint = async function (quizIdx, userIdx) {
         const quizTypeByIdxResult = await boardDao.selectQuizTypeByQuizIdx(connection, quizIdx);
         const quizTypeByIdxList = await Promise.all(quizTypeByIdxResult.map(async(val) => val.quizType))
 
-        if (quizTypeByIdxList == 0) {
+        if (quizTypeByIdxList == 1) {
             const updateUserPointToObjectiveResult = await boardDao.userPointAfterObjectiveQuiz(connection, quizIdx, userIdx)
             await connection.commit();
             return response(baseResponse.SUCCESS, updateUserPointToObjectiveResult);
