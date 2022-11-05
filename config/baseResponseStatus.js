@@ -60,6 +60,9 @@ module.exports = {
     POINT_QUIZIDX_EXIST : { "isSuccess": false, "code": 2038, "message": "퀴즈 인덱스를 입력해 주세요." },
     USER_QUIZ_MAKER_SAME : { "isSuccess": false, "code": 2039, "message": "자기가 낸 문제는 자기가 풀 수 없습니다." },
 
+    ACCESS_TOKEN_EMPTY : { "isSuccess": false, "code": 2040, "message": "엑세스 토큰을 입력해 주세요." },
+    USER_SOCIAL_ID_NOT_EXIST : { "isSuccess": false, "code": 2041, "message": "해당 소셜 ID를 가진 회원이 없습니다. 소셜 회원가입을 먼저 진행해 주세요." },
+
 
 
     // Response error
