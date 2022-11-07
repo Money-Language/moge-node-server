@@ -189,31 +189,6 @@ async function selectQuizAnswer(connection, boardIdx, quizIdx) {
   return selectQuizAnswerRow;
 }
 
-// // 각 퀴즈 마다 정답 여부 조회 (객관식)
-// async function selectObjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, answerSelectIdx) {
-//   const selectQuizAnswerCorrectQuery = `
-//                     SELECT a.boardIdx, a.quizIdx, b.answerSelectIdx, b.answer,
-//                       IF(b.answerSelectIdx = '01', 'CORRECT', 'WRONG') AS answerCorrect
-//                     FROM Quiz a
-//                     LEFT JOIN ObjectiveAnswer b on a.quizIdx = b.quizIdx
-//                     WHERE a.boardIdx = ? AND a.quizIdx = ? AND b.answerSelectIdx = ?;
-//               `;
-//   const [selectObjectiveQuizAnswerCorrectRow] = await connection.query(selectQuizAnswerCorrectQuery, [boardIdx, quizIdx, answerSelectIdx]);
-//   return selectObjectiveQuizAnswerCorrectRow;
-// }
-
-// // 각 퀴즈 마다 정답 여부 조회 (주관식)
-// async function selectSubjectiveQuizAnswerCorrect(connection, boardIdx, quizIdx, answerSelectIdx) {
-//   const selectQuizAnswerCorrectQuery = `
-//                       SELECT a.boardIdx, a.quizIdx, b.answerSelectIdx, b.answer
-//                       FROM Quiz a
-//                       LEFT JOIN SubjectiveAnswer b on a.quizIdx = b.quizIdx
-//                       WHERE a.boardIdx = ? AND a.quizIdx = ? AND b.answerSelectIdx = ?;
-//               `;
-//   const [selectSubjectiveQuizAnswerCorrectRow] = await connection.query(selectQuizAnswerCorrectQuery, [boardIdx, quizIdx, answerSelectIdx]);
-//   return selectSubjectiveQuizAnswerCorrectRow;
-// }
-
 // 퀴즈 완료 후 유저 포인트 획득 (객관식)
 async function userPointAfterObjectiveQuiz(connection, quizIdx, userIdx) {
   const userPointAfterObjectiveQuizQuery = `
@@ -308,8 +283,6 @@ module.exports = {
   selectBoardIdxByQuizIdx,
   selectBoardQuiz,
   selectQuizAnswer,
-  // selectObjectiveQuizAnswerCorrect,
-  // selectSubjectiveQuizAnswerCorrect,
   userPointAfterObjectiveQuiz,
   userPointAfterSubjectiveQuiz,
   selectUserIdxByQuizIdx,
