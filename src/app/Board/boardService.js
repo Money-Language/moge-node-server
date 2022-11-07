@@ -80,12 +80,20 @@ exports.createQuiz = async ( question, quizType, boardIdx ) => {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
-        const createQuizResponse = await boardDao.createQuiz(connection, question, quizType, boardIdx);
-        const quizIdx = createQuizResponse.insertId;
+        const categoryIdxByBoardIdxResult = await boardDao.selectCategoryIdxByBoardIdx(connection, boardIdx);
+        const categoryIdxValue = await Promise.all(categoryIdxByBoardIdxResult[0].map(async(val) => val.categoryIdx))
 
-        const result = { question, quizType, boardIdx, quizIdx }
-        await connection.commit();
-        return response(baseResponse.SUCCESS, result)
+        if (categoryIdxValue == 1 && quizType == 1) {
+            return res.send(errResponse(baseResponse.NEW_WORDS_SUBJECTIVE_ONLY));
+        } else if (categoryIdxValue == 2 && quizType == 2) {
+            return res.send(errResponse(baseResponse.GRAMMERS_OBJECTIVE_ONLY));
+        } else {
+            const createQuizResponse = await boardDao.createQuiz(connection, question, quizType, boardIdx);
+            const quizIdx = createQuizResponse.insertId;
+            const result = { question, quizType, boardIdx, quizIdx }
+            await connection.commit();
+            return response(baseResponse.SUCCESS, result)
+        }
     } catch (err) {
         await connection.rollback();
         logger.error(`App - createQuiz Service error\n: ${err.message}`);

@@ -228,6 +228,17 @@ async function selectUserIdxByQuizIdx(connection, quizIdx) {
   return selectUserIdxByQuizIdxRow;
 }
 
+// 게시글 인덱스를 통해 카테고리 인덱스 조회
+async function selectCategoryIdxByBoardIdx(connection, boardIdx) {
+  const selectCategoryIdxByBoardIdxQuery = `
+                        SELECT categoryIdx
+                        FROM Board
+                        WHERE boardIdx = ?;
+                  `;
+  const selectCategoryIdxByBoardIdxRow = await connection.query(selectCategoryIdxByBoardIdxQuery, boardIdx);
+  return selectCategoryIdxByBoardIdxRow;
+}
+
 // 게시글 등록
 async function createBoard(connection, title, userIdx, categoryIdx) {
   const boardQuery = `
@@ -286,6 +297,7 @@ module.exports = {
   userPointAfterObjectiveQuiz,
   userPointAfterSubjectiveQuiz,
   selectUserIdxByQuizIdx,
+  selectCategoryIdxByBoardIdx,
   createBoard,
   createQuiz,
   createObjectiveAnswer,
