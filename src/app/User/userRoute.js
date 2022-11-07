@@ -83,5 +83,8 @@ module.exports = function(app){
     // 2-1. 네이버 Access 토큰 발급 Url
     app.get('/auth/naver/callback', passport.authenticate('naver-login', { failureRedirect: '/auth', successRedirect: '/' }));
 
+    // 14. 유저 포인트 조회 API
+    app.get('/app/users/:userIdx/points', jwtMiddleware, user.viewUserPoints);
+
 };
 

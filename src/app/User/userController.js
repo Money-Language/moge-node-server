@@ -197,3 +197,25 @@ exports.loginNaver = async function (req, res) {
         return res.send(errResponse(baseResponse.USER_INFO_EMPTY));
     }
 };
+
+
+/**
+ * API No. 14
+ * API Name : 각 유저마다 포인트 조회하는 API
+ * [GET] /app/users/{userIdx}/points
+ */
+exports.viewUserPoints = async function (req, res) {
+    /**
+     * Path Parameter : userIdx
+     */
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        const userPointResult = await userProvider.viewUserPoint(userIdx);
+        return res.send(response(baseResponse.SUCCESS, userPointResult[0]));
+    }
+};

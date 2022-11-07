@@ -1,5 +1,7 @@
 const { pool } = require("../../../config/database");
 const { logger } = require("../../../config/winston");
+const baseResponse = require("../../../config/baseResponseStatus");
+const { response, errResponse } = require("../../../config/response");
 
 const userDao = require("./userDao");
 
@@ -87,4 +89,20 @@ exports.accountSocialCheck = async function (socialCreatedID) {
   connection.release();
 
   return accountSocialUserResult;
+};
+
+// 각 유저가 보유한 포인트 조회
+exports.viewUserPoint = async function (userIdx) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const userResult = await userDao.selectUserId(connection, userIdx);
+
+  if (userResult[0].status === 'INACTIVE') {
+      return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
+  } else if (userResult[0].status === 'DELETED') {
+      return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
+  }
+
+  const userPointResult = await userDao.selectUserPoint(connection, userIdx);
+  connection.release();
+  return userPointResult;
 };

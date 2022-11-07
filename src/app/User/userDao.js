@@ -22,7 +22,7 @@ async function selectUserEmail(connection, email) {
 // userIdx 회원 조회
 async function selectUserId(connection, userIdx) {
   const selectUserIdQuery = `
-                  SELECT userIdx, email, nickname 
+                  SELECT userIdx, email, nickname, status
                   FROM User 
                   WHERE userIdx = ?;
                 `;
@@ -117,6 +117,17 @@ async function insertSocialUser(connection, insertUserParams) {
   return insertUserRow;
 }
 
+// 각 유저마다 포인트 조회
+async function selectUserPoint(connection, userIdx) {
+  const selectUserPointQuery = `
+                        SELECT userIdx, nickname, userPoint
+                        FROM User
+                        WHERE userIdx = ? AND status = 'ACTIVE';
+                  `;
+  const selectUserPointRow = await connection.query(selectUserPointQuery, userIdx);
+  return selectUserPointRow;
+}
+
 
 module.exports = {
   selectUser,
@@ -128,5 +139,6 @@ module.exports = {
   selectUserPassword,
   selectUserAccount,
   selectUserSocialAccount,
-  insertSocialUser
+  insertSocialUser,
+  selectUserPoint
 };
