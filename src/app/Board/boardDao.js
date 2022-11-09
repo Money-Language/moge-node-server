@@ -305,7 +305,7 @@ async function selectWrongAnswerDate(connection, userIdx) {
   const selectWrongAnswerDateQuery = `
                               SELECT DATE_FORMAT(createdAt, '%y.%m.%d') AS date
                               FROM WrongAnswer
-                              WHERE userIdx = ?;
+                              WHERE userIdx = ? AND status = 'ACTIVE';
                           `;
   const selectWrongAnswerDateRow = await connection.query(selectWrongAnswerDateQuery, userIdx);
   return selectWrongAnswerDateRow;
