@@ -279,6 +279,101 @@ async function createSubjectiveAnswer(connection, hint, content, isAnswer, quizI
   return createSubjectAnswerRows;
 }
 
+// 퀴즈 풀 때 틀린 답 적재
+async function stackWrongAnswer(connection, userIdx, categoryIdx, boardIdx, quizIdx) {
+  const stackWrongAnswerQuery = `
+      INSERT INTO WrongAnswer(userIdx, categoryIdx, boardIdx, quizIdx)
+      VALUES (?, ?, ?, ?);
+  `;
+  const [stackWrongAnswerRows] = await connection.query(stackWrongAnswerQuery, [userIdx, categoryIdx, boardIdx, quizIdx]);
+  return stackWrongAnswerRows;
+}
+
+// 맞춘 오답 삭제
+async function deleteWrongAnswer(connection, userIdx, quizIdx) {
+  const deleteWrongAnswerQuery = `
+      UPDATE WrongAnswer
+      SET status = 'DELETE'
+      WHERE userIdx = ? AND quizIdx = ?;
+  `;
+  const [deleteWrongAnswerRows] = await connection.query(deleteWrongAnswerQuery, [userIdx, quizIdx]);
+  return deleteWrongAnswerRows;
+}
+
+// 오답이 있는 날짜 조회
+async function selectWrongAnswerDate(connection, userIdx) {
+  const selectWrongAnswerDateQuery = `
+                              SELECT DATE_FORMAT(createdAt, '%y.%m.%d') AS date
+                              FROM WrongAnswer
+                              WHERE userIdx = ?;
+                          `;
+  const selectWrongAnswerDateRow = await connection.query(selectWrongAnswerDateQuery, userIdx);
+  return selectWrongAnswerDateRow;
+}
+
+// 날짜에 따른 오답 조회
+async function selectWrongAnswerByDate(connection, userIdx, date) {
+  const selectWrongAnswerByDateQuery = `
+                                SELECT categoryIdx, boardIdx, quizIdx
+                                FROM WrongAnswer
+                                WHERE userIdx = ? AND DATE_FORMAT(createdAt, '%y.%m.%d') = DATE_FORMAT( ?, '%y.%m.%d' );
+                          `;
+  const selectWrongAnswerByDateRow = await connection.query(selectWrongAnswerByDateQuery, [userIdx, date]);
+  return selectWrongAnswerByDateRow;
+}
+
+// 오답 복습 퀴즈 문제 전체 조회
+async function selectWrongAnswerWholeQuiz(connection, userIdx) {
+  const selectWrongAnswerQuizQuery = `
+                                  SELECT b.quizIdx, b.quizType, b.question
+                                  FROM WrongAnswer a
+                                  LEFT JOIN Quiz b on a.quizIdx = b.quizIdx
+                                  WHERE a.userIdx = ? AND a.status = 'ACTIVE';
+                          `;
+  const selectWrongAnswerQuizRow = await connection.query(selectWrongAnswerQuizQuery, userIdx);
+  return selectWrongAnswerQuizRow;
+}
+
+// 오답 복습 퀴즈 문제 냩개 조회
+async function selectWrongAnswerElementQuiz(connection, userIdx, quizIdx) {
+  const selectWrongAnswerQuizQuery = `
+                                  SELECT b.quizIdx, b.quizType, b.question
+                                  FROM WrongAnswer a
+                                  LEFT JOIN Quiz b on a.quizIdx = b.quizIdx
+                                  WHERE a.userIdx = ? AND a.quizIdx = ? AND a.status = 'ACTIVE';
+                          `;
+  const selectWrongAnswerQuizRow = await connection.query(selectWrongAnswerQuizQuery, [userIdx, quizIdx]);
+  return selectWrongAnswerQuizRow;
+}
+
+// 오답 복습 퀴즈 정답 조회
+async function selectWrongAnswerContents(connection, userIdx, quizIdx) {
+  const selectWrongQuizAnswerQuery = `
+                                SELECT a.quizIdx,
+                                IF (b.quizType = 1, (c.content), (d.content)) AS content,
+                                IF (b.quizType = 1, (c.isAnswer), (d.isAnswer)) AS isAnswer,
+                                IF (b.quizType = 1, 'OBJECTIVE', d.hint) AS hint
+                                FROM WrongAnswer a
+                                LEFT JOIN Quiz b on b.quizIdx = a.quizIdx
+                                LEFT JOIN ObjectiveAnswer c on b.quizIdx = c.quizIdx
+                                LEFT JOIN SubjectiveAnswer d on b.quizIdx = d.quizIdx
+                                WHERE a.userIdx = ? AND a.quizIdx = ? AND a.status = 'ACTIVE';
+                          `;
+  const selectWrongQuizAnswerRow = await connection.query(selectWrongQuizAnswerQuery, [userIdx, quizIdx]);
+  return selectWrongQuizAnswerRow;
+}
+
+
+// // 게시글 신고 횟수 조회
+// async function selectCountBoardReport(connection, hint, content, isAnswer, quizIdx) {
+//   const selectCountBoardReportQuery = `
+//       INSERT INTO SubjectiveAnswer(hint, content, isAnswer, quizIdx)
+//       VALUES (?, ?, ?, ?);
+//   `;
+//   const [selectCountBoardReportRows] = await connection.query(selectCountBoardReportQuery, [hint, content, isAnswer, quizIdx]);
+//   return selectCountBoardReportRows;
+// }
+
 
 module.exports = { 
   selectUserFeed,
@@ -301,5 +396,12 @@ module.exports = {
   createBoard,
   createQuiz,
   createObjectiveAnswer,
-  createSubjectiveAnswer
+  createSubjectiveAnswer,
+  stackWrongAnswer,
+  deleteWrongAnswer,
+  selectWrongAnswerDate,
+  selectWrongAnswerByDate,
+  selectWrongAnswerWholeQuiz,
+  selectWrongAnswerElementQuiz,
+  selectWrongAnswerContents
   };

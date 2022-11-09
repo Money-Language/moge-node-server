@@ -379,3 +379,127 @@ exports.postAnswer = async function (req, res) {
     //     return res.send(boardQuizResponse)
     // }
 // }
+
+
+/**
+ * API No. 15
+ * API Name : 사용자 오답 적재 API
+ * [POST] /app/users/{userIdx}/wrong-answer
+ */
+exports.postWrongAnswer = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { categoryIdx, boardIdx, quizIdx } = req.body;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!categoryIdx) return res.send(errResponse(baseResponse.BOARD_CATEGORYIDX_NOT_EXIST));
+        if (!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
+        if (!quizIdx) return res.send(errResponse(baseResponse.BOARD_QUIZIDX_NOT_EXIST));
+
+        const wrongAnswerResponse = await boardService.stackWrongAnswer( userIdx, categoryIdx, boardIdx, quizIdx );
+        return res.send(wrongAnswerResponse)
+    }
+}
+
+
+/**
+ * API No. 16
+ * API Name : 맞춘 오답 삭제 API
+ * [DELETE] /app/users/{userIdx}/wrong-answer
+ */
+exports.deleteWrongAnswer = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { quizIdx } = req.body;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!quizIdx) return res.send(errResponse(baseResponse.BOARD_QUIZIDX_NOT_EXIST));
+
+        const deleteWrongAnswerResponse = await boardService.removeWrongAnswer( userIdx, quizIdx );
+        return res.send(deleteWrongAnswerResponse)
+    }
+}
+
+
+/**
+ * API No. 17
+ * API Name : 오답이 있는 날짜 조회 API
+ * [GET] /app/users/{userIdx}/wrong-answer/date
+ */
+exports.getWrongAnswerDate = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const date = req.query.date;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!date) {
+            const getWrongAnswerDateResponse = await boardProvider.viewWrongAnswerDate( userIdx );
+            return res.send(response(baseResponse.SUCCESS, getWrongAnswerDateResponse[0]));
+        } else {
+            const getWrongAnswerByDateResponse = await boardProvider.viewWrongAnswerByDate( userIdx, date );
+            return res.send(response(baseResponse.SUCCESS, getWrongAnswerByDateResponse[0]));
+        }
+    }
+}
+
+
+/**
+ * API No. 18
+ * API Name : 오답 복습 퀴즈 문제 조회
+ * [GET] /app/users/{userIdx}/wrong-answer
+ */
+exports.getWrongAnswerQuiz = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const quizIdx = req.query.quizIdx;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!quizIdx) {
+            const getWrongAnswerDateResponse = await boardProvider.viewWrongWholeQuiz( userIdx );
+            return res.send(response(baseResponse.SUCCESS, getWrongAnswerDateResponse[0]));
+        } else {
+            const getWrongAnswerByDateResponse = await boardProvider.viewWrongElementQuiz( userIdx, quizIdx );
+            return res.send(response(baseResponse.SUCCESS, getWrongAnswerByDateResponse[0]));
+        }
+    } 
+}
+
+
+/**
+ * API No. 19
+ * API Name : 오답 복습 퀴즈 정답 보기 조회
+ * [GET] /app/users/{userIdx}/wrong-answer/{quizIdx}
+ */
+exports.getWrongAnswerContents = async function (req, res) {
+
+    const { userIdx, quizIdx } = req.params;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!quizIdx) {
+            return res.send(errResponse(baseResponse.BOARD_QUIZIDX_NOT_EXIST));
+        } else {
+            const getWrongAnswerContentsResponse = await boardProvider.viewWrongAnswerContents( userIdx, quizIdx );
+            return res.send(response(baseResponse.SUCCESS, getWrongAnswerContentsResponse[0]));
+        }
+    } 
+}

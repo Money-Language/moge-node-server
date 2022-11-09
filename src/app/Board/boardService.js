@@ -161,3 +161,42 @@ exports.createAnswer = async ( hint, content, isAnswer, quizIdx ) => {
 //         connection.release();
 //     }
 // }
+
+
+// 퀴즈 풀 때 틀린 답 적재
+exports.stackWrongAnswer = async ( userIdx, categoryIdx, boardIdx, quizIdx ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        const stackWrongAnswerResult = await boardDao.stackWrongAnswer(connection, userIdx, categoryIdx, boardIdx, quizIdx);
+
+        const result = { userIdx, categoryIdx, boardIdx, quizIdx }
+        await connection.commit();
+        return response(baseResponse.SUCCESS, result)
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - stackWrongAnswer Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+
+// 맞춘 오답 삭제
+exports.removeWrongAnswer = async ( userIdx, quizIdx ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        const removeWrongAnswerResult = await boardDao.deleteWrongAnswer(connection, userIdx, quizIdx);
+
+        await connection.commit();
+        return response(baseResponse.SUCCESS)
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - removeWrongAnswer Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}

@@ -140,3 +140,43 @@ exports.viewUserIdxByQuizIdx = async function (quizIdx) {
     connection.release();
     return userIdxByQuizIdxResult;
 };
+
+// 오답이 있는 날짜 조회
+exports.viewWrongAnswerDate = async function (userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const viewWrongAnswerDateResult = await boardDao.selectWrongAnswerDate(connection, userIdx);
+    connection.release();
+    return viewWrongAnswerDateResult;
+};
+
+// 날짜로 해당 날짜의 오답 조회
+exports.viewWrongAnswerByDate = async function (userIdx, date) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const viewWrongAnswerByDateResult = await boardDao.selectWrongAnswerByDate(connection, userIdx, date);
+    connection.release();
+    return viewWrongAnswerByDateResult;
+};
+
+// 오답 복습 퀴즈 문제 전체 조회
+exports.viewWrongWholeQuiz = async function (userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const viewWrongWholeQuizResult = await boardDao.selectWrongAnswerWholeQuiz(connection, userIdx);
+    connection.release();
+    return viewWrongWholeQuizResult;
+};
+
+// 오답 복습 퀴즈 문제 낱개 조회
+exports.viewWrongElementQuiz = async function (userIdx, quizIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const viewWrongElementQuizResult = await boardDao.selectWrongAnswerElementQuiz(connection, userIdx, quizIdx);
+    connection.release();
+    return viewWrongElementQuizResult;
+};
+
+// 오답 복습 퀴즈 정답 내용 조회
+exports.viewWrongAnswerContents = async function (userIdx, quizIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const viewWrongAnswerContentsResult = await boardDao.selectWrongAnswerContents(connection, userIdx, quizIdx);
+    connection.release();
+    return viewWrongAnswerContentsResult;
+};

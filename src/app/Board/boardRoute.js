@@ -32,5 +32,20 @@ module.exports = function(app){
     // 11. 정답 등록
     app.post('/app/users/:userIdx/answer', jwtMiddleware, board.postAnswer);
 
+    // 15. 사용자 오답 적재
+    app.post('/app/users/:userIdx/wrong-answer', jwtMiddleware, board.postWrongAnswer);
+
+    // 16. 맞춘 오답 삭제
+    app.delete('/app/users/:userIdx/wrong-answer', jwtMiddleware, board.deleteWrongAnswer);
+
+    // 17. 오답이 있는 날짜 조회
+    app.get('/app/users/:userIdx/wrong-answer/date', jwtMiddleware, board.getWrongAnswerDate);
+
+    // 18. 오답 복습 퀴즈 문제 조회
+    app.get('/app/users/:userIdx/wrong-answer', jwtMiddleware, board.getWrongAnswerQuiz);
+
+    // 19. 오답 복습 퀴즈 정답 보기 조회
+    app.get('/app/users/:userIdx/wrong-answer/:quizIdx', jwtMiddleware, board.getWrongAnswerContents);
+
 };
 
