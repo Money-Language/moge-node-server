@@ -63,6 +63,12 @@ module.exports = {
     ACCESS_TOKEN_EMPTY : { "isSuccess": false, "code": 2040, "message": "엑세스 토큰을 입력해 주세요." },
     USER_SOCIAL_ID_NOT_EXIST : { "isSuccess": false, "code": 2041, "message": "해당 소셜 ID를 가진 회원이 없습니다. 소셜 회원가입을 먼저 진행해 주세요." },
 
+    REPORT_CONTENT_EMPTY : { "isSuccess": false, "code": 2042, "message": "신고 내용이 비어있습니다. 신고 내용을 입력해주세요." },
+    REPORT_BOARD_WRITER_SAME : { "isSuccess": false, "code": 2043, "message": "자기가 쓴 게시글을 자기가 신고할 수 없습니다." },
+    REPORT_NOT_OVER_TWICE_SAME : { "isSuccess": false, "code": 2044, "message": "같은 게시글을 두 번 이상 신고할 수 없습니다." },
+    REPORT_QUIZ_WRITER_SAME : { "isSuccess": false, "code": 2045, "message": "자기가 쓴 퀴즈를 자기가 신고할 수 없습니다." },
+    REPORT_QUIZ_NOT_OVER_TWICE_SAME : { "isSuccess": false, "code": 2046, "message": "같은 퀴즈를 두 번 이상 신고할 수 없습니다." },
+
 
 
     // Response error
@@ -77,6 +83,14 @@ module.exports = {
     SUBJECTIVE_ANSWERSELECTIDX_NOT_EXIST : { "isSuccess": false, "code": 3009, "message": "주관식 정답에는 answerSelected가 1이 고정입니다." },
     NEW_WORDS_SUBJECTIVE_ONLY : { "isSuccess": false, "code": 3010, "message": "신조어는 주관식만 가능합니다." },
     GRAMMERS_OBJECTIVE_ONLY : { "isSuccess": false, "code": 3011, "message": "맞춤법은 객관식만 가능합니다." },
+
+    BOARD_ALREADY_INACTIVE : { "isSuccess": false, "code": 3013, "message": "3번 이상 신고 누적으로 비활성화된 게시글입니다." },
+    BOARD_ALREADY_DELETE : { "isSuccess": false, "code": 3014, "message": "삭제된 게시글입니다." },
+
+    QUIZ_ALREADY_INACTIVE : { "isSuccess": false, "code": 3015, "message": "3번 이상 신고 누적으로 비활성화된 퀴즈입니다." },
+    QUIZ_ALREADY_DELETE : { "isSuccess": false, "code": 3016, "message": "삭제된 퀴즈입니다." },
+
+
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
