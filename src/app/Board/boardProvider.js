@@ -56,12 +56,28 @@ exports.viewCategoryTitle = async function (categoryIdx) {
     return categoryTitleResult;
 };
 
-// 각 카테고리별로 작성한 게시글(피드) 조회
+// 각 카테고리별로 작성한 게시글(피드) 조회 - 최신순
 exports.viewFeedByCategoryIdx = async function (categoryIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
     const categoryFeedResult = await boardDao.selectCategoryFeed(connection, categoryIdx);
     connection.release();
     return categoryFeedResult;
+};
+
+// 각 카테고리별로 작성한 게시글(피드) 조회 - 조회순
+exports.viewFeedOrderViewByCategoryIdx = async function (categoryIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const categoryFeedOrderViewResult = await boardDao.selectCategoryFeedOrderView(connection, categoryIdx);
+    connection.release();
+    return categoryFeedOrderViewResult;
+};
+
+// 각 카테고리별로 작성한 게시글(피드) 조회 - 인기순
+exports.viewFeedOrderLikeByCategoryIdx = async function (categoryIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const categoryFeedOrderLikeResult = await boardDao.selectCategoryFeedOrderLike(connection, categoryIdx);
+    connection.release();
+    return categoryFeedOrderLikeResult;
 };
 
 // 모든 퀴즈 조회

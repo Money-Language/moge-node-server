@@ -108,7 +108,7 @@ async function categoryTitleInfo(connection, categoryIdx) {
   return selectCategoryRow;
 }
 
-// 각 카테고리 별로 게시글 조회
+// 각 카테고리 별로 게시글 조회 - 최신순
 async function selectCategoryFeed(connection, categoryIdx) {
   const selectCategoryFeedQuery = `
                         SELECT  b.boardIdx,
@@ -134,10 +134,77 @@ async function selectCategoryFeed(connection, categoryIdx) {
                         LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
                         LEFT JOIN Comment f on b.boardIdx = f.boardIdx
                         WHERE d.categoryIdx = ? AND b.status = 'ACTIVE'
-                        GROUP BY b.boardIdx;
+                        GROUP BY b.boardIdx
+                        ORDER BY elapsedTime ASC;
                 `;
   const [categoryFeedRow] = await connection.query(selectCategoryFeedQuery, categoryIdx);
   return categoryFeedRow;
+}
+
+// 각 카테고리 별로 게시글 조회 - 조회순
+async function selectCategoryFeedOrderView(connection, categoryIdx) {
+  const selectCategoryFeedOrderViewQuery = `
+                        SELECT  b.boardIdx,
+                                a.nickname,
+                                a.profileImage,
+                                CASE
+                                  WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) <= 0 THEN '방금 전'
+                                  WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) < 60 THEN CONCAT(TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()), '분 전')
+                                  WHEN TIMESTAMPDIFF(HOUR, b.createdAt, NOW()) < 24 THEN CONCAT(TIMESTAMPDIFF(HOUR, b.createdAt, NOW()), '시간 전')
+                                  WHEN TIMESTAMPDIFF(DAY, b.createdAt, NOW()) < 7 THEN CONCAT(TIMESTAMPDIFF(DAY, b.createdAt, NOW()), '일 전')
+                                  WHEN TIMESTAMPDIFF(WEEK, b.createdAt, NOW()) < 5 THEN CONCAT(TIMESTAMPDIFF(WEEK, b.createdAt, NOW()), '주 전')
+                                  ELSE CONCAT(TIMESTAMPDIFF(MONTH, b.createdAt, NOW()), '달 전')
+                                END AS 'elapsedTime',
+                                b.title,
+                                COUNT(distinct c.quizIdx) AS 'quizCount',
+                                b.viewCount,
+                                COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount',
+                                COUNT(distinct (case when f.status='ACTIVE' then f.commentIdx end)) AS 'commentCount'
+                        FROM User a
+                        LEFT JOIN Board b on a.userIdx = b.userIdx
+                        LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
+                        LEFT JOIN Category d on b.categoryIdx = d.categoryIdx
+                        LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
+                        LEFT JOIN Comment f on b.boardIdx = f.boardIdx
+                        WHERE d.categoryIdx = ? AND b.status = 'ACTIVE'
+                        GROUP BY b.boardIdx, b.viewCount
+                        ORDER BY b.viewCount DESC;
+                `;
+  const [categoryFeedOrderViewRow] = await connection.query(selectCategoryFeedOrderViewQuery, categoryIdx);
+  return categoryFeedOrderViewRow;
+}
+
+// 각 카테고리 별로 게시글 조회 - 인기순
+async function selectCategoryFeedOrderLike(connection, categoryIdx) {
+  const selectCategoryFeedOrderLikeQuery = `
+                        SELECT  b.boardIdx,
+                                a.nickname,
+                                a.profileImage,
+                                CASE
+                                  WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) <= 0 THEN '방금 전'
+                                  WHEN TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()) < 60 THEN CONCAT(TIMESTAMPDIFF(MINUTE, b.createdAt, NOW()), '분 전')
+                                  WHEN TIMESTAMPDIFF(HOUR, b.createdAt, NOW()) < 24 THEN CONCAT(TIMESTAMPDIFF(HOUR, b.createdAt, NOW()), '시간 전')
+                                  WHEN TIMESTAMPDIFF(DAY, b.createdAt, NOW()) < 7 THEN CONCAT(TIMESTAMPDIFF(DAY, b.createdAt, NOW()), '일 전')
+                                  WHEN TIMESTAMPDIFF(WEEK, b.createdAt, NOW()) < 5 THEN CONCAT(TIMESTAMPDIFF(WEEK, b.createdAt, NOW()), '주 전')
+                                  ELSE CONCAT(TIMESTAMPDIFF(MONTH, b.createdAt, NOW()), '달 전')
+                                END AS 'elapsedTime',
+                                b.title,
+                                COUNT(distinct c.quizIdx) AS 'quizCount',
+                                b.viewCount,
+                                COUNT(distinct (case when e.status='ACTIVE' then e.boardLikeIdx end)) AS 'likeCount',
+                                COUNT(distinct (case when f.status='ACTIVE' then f.commentIdx end)) AS 'commentCount'
+                        FROM User a
+                        LEFT JOIN Board b on a.userIdx = b.userIdx
+                        LEFT JOIN Quiz c on b.boardIdx = c.boardIdx
+                        LEFT JOIN Category d on b.categoryIdx = d.categoryIdx
+                        LEFT JOIN BoardLike e on b.boardIdx = e.boardIdx
+                        LEFT JOIN Comment f on b.boardIdx = f.boardIdx
+                        WHERE d.categoryIdx = ? AND b.status = 'ACTIVE'
+                        GROUP BY b.boardIdx
+                        ORDER BY likeCount DESC;
+                `;
+  const [categoryFeedOrderLikeRow] = await connection.query(selectCategoryFeedOrderLikeQuery, categoryIdx);
+  return categoryFeedOrderLikeRow;
 }
 
 // 퀴즈 아이디로 퀴즈 타입 조회
@@ -472,6 +539,8 @@ module.exports = {
   updateViewCount,
   categoryTitleInfo,
   selectCategoryFeed,
+  selectCategoryFeedOrderView,
+  selectCategoryFeedOrderLike,
   selectQuiz,
   selectQuizTypeByQuizIdx,
   selectBoardIdxByQuizIdx,

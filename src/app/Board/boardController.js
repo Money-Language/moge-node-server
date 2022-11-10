@@ -83,6 +83,7 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
      * Path Parameter : categoryIdx
      */
     const categoryIdx = req.params.categoryIdx;
+    const order = req.query.order;
     const boardResult = await boardProvider.viewBoard();
     const categoryResult = await boardProvider.viewCategory();
     const boardCategoryIdxList = await Promise.all(boardResult.map(async(val) => val.categoryIdx))
@@ -93,10 +94,17 @@ exports.getBoardListBycategoryIdx = async function (req, res) {
     } else {
         if (!boardCategoryIdxList.includes(parseInt(categoryIdx))) {
             return res.send(errResponse(baseResponse.CATEGORY_LIST_EMPTY));
-        }
-        else {
-            const feedByCategoryIdx = await boardProvider.viewFeedByCategoryIdx(categoryIdx);
-            return res.send(response(baseResponse.SUCCESS,feedByCategoryIdx));
+        } else {
+            if (order == "view") {
+                const feedOrderViewByCategoryIdx = await boardProvider.viewFeedOrderViewByCategoryIdx(categoryIdx);
+                return res.send(response(baseResponse.SUCCESS, feedOrderViewByCategoryIdx));
+            } else if (order == "like") {
+                const feedOrderLikeByCategoryIdx = await boardProvider.viewFeedOrderLikeByCategoryIdx(categoryIdx);
+                return res.send(response(baseResponse.SUCCESS, feedOrderLikeByCategoryIdx));
+            } else {
+                const feedByCategoryIdx = await boardProvider.viewFeedByCategoryIdx(categoryIdx);
+                return res.send(response(baseResponse.SUCCESS, feedByCategoryIdx));
+            }
         }
     }
 };
