@@ -47,5 +47,10 @@ module.exports = function(app){
     // 19. 오답 복습 퀴즈 정답 보기 조회
     app.get('/app/users/:userIdx/wrong-answer/:quizIdx', jwtMiddleware, board.getWrongAnswerContents);
 
+    // 20. 게시글 신고하기
+    app.post('/app/boards/:boardIdx/report', jwtMiddleware, board.postReportBoard);
+
+    // 21. 퀴즈 신고하기
+    app.post('/app/boards/:boardIdx/quiz/:quizIdx/report', jwtMiddleware, board.postReportQuiz);
 };
 

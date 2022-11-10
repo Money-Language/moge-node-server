@@ -503,3 +503,72 @@ exports.getWrongAnswerContents = async function (req, res) {
         }
     } 
 }
+
+
+/**
+ * API No. 20
+ * API Name : 게시글 신고하기 API
+ * [POST] /app/boards/{boardIdx}/report
+ */
+exports.postReportBoard = async function (req, res) {
+
+    const boardIdx = req.params.boardIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { content, userIdx } = req.body;
+
+    const boardWriterResult = await boardProvider.viewUserIdxByBoardIdx(boardIdx);
+    const boardWriter = await Promise.all(boardWriterResult[0].map(async(val) => val.userIdx))
+    const getBoardAfterReportResult = await boardProvider.viewBoardAfterReport(userIdx, boardIdx);
+
+    if (!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!content) return res.send(errResponse(baseResponse.REPORT_CONTENT_EMPTY));
+        if (boardWriter == userIdx) {
+            return res.send(errResponse(baseResponse.REPORT_BOARD_WRITER_SAME));
+        } else {
+            if (getBoardAfterReportResult[0].length > 0) {
+                return res.send(errResponse(baseResponse.REPORT_NOT_OVER_TWICE_SAME));
+            } else {
+                const reportBoardResponse = await boardService.createReportBoard( content, userIdx, boardIdx );
+                return res.send(reportBoardResponse)
+            }
+        }
+    }
+}
+
+
+/**
+ * API No. 21
+ * API Name : 퀴즈 신고하기 API
+ * [POST] /app/boards/{boardIdx}/quiz/{quizIdx}/report
+ */
+exports.postReportQuiz = async function (req, res) {
+
+    const { boardIdx, quizIdx } = req.params;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+    const { content, userIdx } = req.body;
+
+    const quizWriterResult = await boardProvider.viewUserIdxByQuizIdx(quizIdx);
+    const quizWriter = await Promise.all(quizWriterResult[0].map(async(val) => val.userIdx))
+    const getQuizAfterReportResult = await boardProvider.viewQuizAfterReport(userIdx, boardIdx, quizIdx);
+
+    if (!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
+    if (!quizIdx) return res.send(errResponse(baseResponse.POINT_QUIZIDX_EXIST));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        if (!content) return res.send(errResponse(baseResponse.REPORT_CONTENT_EMPTY));
+        if (quizWriter == userIdx) {
+            return res.send(errResponse(baseResponse.REPORT_QUIZ_WRITER_SAME));
+        } else {
+            if (getQuizAfterReportResult[0].length > 0) {
+                return res.send(errResponse(baseResponse.REPORT_QUIZ_NOT_OVER_TWICE_SAME));
+            } else {
+                const reportQuizResponse = await boardService.createReportQuiz( content, userIdx, boardIdx, quizIdx );
+                return res.send(reportQuizResponse)
+            }
+        }
+    }
+}

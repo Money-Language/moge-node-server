@@ -180,3 +180,43 @@ exports.viewWrongAnswerContents = async function (userIdx, quizIdx) {
     connection.release();
     return viewWrongAnswerContentsResult;
 };
+
+// 게시글 번호로 게시글 작성한 유저 인덱스 조회
+exports.viewUserIdxByBoardIdx = async function (boardIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userIdxByBoardIdxResult = await boardDao.selectUserIdxByBoardIdx(connection, boardIdx);
+    connection.release();
+    return userIdxByBoardIdxResult;
+};
+
+// 자기가 신고했던 게시글 조회
+exports.viewBoardAfterReport = async function (userIdx, boardIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const boardAfterReportResult = await boardDao.selectBoardAfterReport(connection, userIdx, boardIdx);
+    connection.release();
+    return boardAfterReportResult;
+};
+
+// 게시글 상태 체크
+exports.boardCheck = async function (boardIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const boardStatusResult = await boardDao.selectBoardStatus(connection, boardIdx);
+    connection.release();
+    return boardStatusResult;
+};
+
+// 자기가 신고했던 퀴즈 조회
+exports.viewQuizAfterReport = async function (userIdx, boardIdx, quizIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const quizAfterReportResult = await boardDao.selectQuizAfterReport(connection, userIdx, boardIdx, quizIdx);
+    connection.release();
+    return quizAfterReportResult;
+};
+
+// 퀴즈 상태 체크
+exports.quizCheck = async function (quizIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const quizStatusResult = await boardDao.selectQuizStatus(connection, quizIdx);
+    connection.release();
+    return quizStatusResult;
+};

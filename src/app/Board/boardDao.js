@@ -316,7 +316,7 @@ async function selectWrongAnswerByDate(connection, userIdx, date) {
   const selectWrongAnswerByDateQuery = `
                                 SELECT categoryIdx, boardIdx, quizIdx
                                 FROM WrongAnswer
-                                WHERE userIdx = ? AND DATE_FORMAT(createdAt, '%y.%m.%d') = DATE_FORMAT( ?, '%y.%m.%d' );
+                                WHERE userIdx = ? AND status = 'ACTIVE' AND DATE_FORMAT(createdAt, '%y.%m.%d') = DATE_FORMAT( ?, '%y.%m.%d' );
                           `;
   const selectWrongAnswerByDateRow = await connection.query(selectWrongAnswerByDateQuery, [userIdx, date]);
   return selectWrongAnswerByDateRow;
@@ -363,16 +363,104 @@ async function selectWrongAnswerContents(connection, userIdx, quizIdx) {
   return selectWrongQuizAnswerRow;
 }
 
+// 게시글 신고하기
+async function createReportBoard(connection, content, userIdx, boardIdx) {
+  const createReportBoardQuery = `
+      INSERT INTO Report(content, userIdx, boardIdx)
+      VALUES (?, ?, ?);
+  `;
+  const [createReportBoardRows] = await connection.query(createReportBoardQuery, [content, userIdx, boardIdx]);
+  return createReportBoardRows;
+}
 
-// // 게시글 신고 횟수 조회
-// async function selectCountBoardReport(connection, hint, content, isAnswer, quizIdx) {
-//   const selectCountBoardReportQuery = `
-//       INSERT INTO SubjectiveAnswer(hint, content, isAnswer, quizIdx)
-//       VALUES (?, ?, ?, ?);
-//   `;
-//   const [selectCountBoardReportRows] = await connection.query(selectCountBoardReportQuery, [hint, content, isAnswer, quizIdx]);
-//   return selectCountBoardReportRows;
-// }
+// 게시글 신고 3회 이상이면 비활성화 설정
+async function updateBoardByReport(connection, boardIdx) {
+  const updateBoardByReportQuery = `
+            UPDATE Board a
+            LEFT JOIN Report b ON a.boardIdx = b.boardIdx
+            SET a.status = 'INACTIVE'
+            WHERE a.boardIdx = ? AND (SELECT COUNT(*) FROM Report WHERE commentIdx = null AND quizIdx = null GROUP BY boardIdx) > 3;
+  `;
+  const [updateBoardByReportRows] = await connection.query(updateBoardByReportQuery, boardIdx);
+  return updateBoardByReportRows;
+}
+
+// 게시글 작성한 사용자 인덱스 조회
+async function selectUserIdxByBoardIdx(connection, boardIdx) {
+  const selectUserIdxByBoardIdxQuery = `
+                        SELECT userIdx
+                        FROM Board
+                        WHERE boardIdx = ?;
+                  `;
+  const selectUserIdxByBoardIdxRow = await connection.query(selectUserIdxByBoardIdxQuery, boardIdx);
+  return selectUserIdxByBoardIdxRow;
+}
+
+// 자기가 신고했던 게시글 조회
+async function selectBoardAfterReport(connection, userIdx, boardIdx) {
+  const selectBoardAfterReportQuery = `
+                        SELECT reportIdx, content
+                        FROM Report
+                        WHERE userIdx = ? AND boardIdx = ?;
+                  `;
+  const selectBoardAfterReportRow = await connection.query(selectBoardAfterReportQuery, [userIdx, boardIdx]);
+  return selectBoardAfterReportRow;
+}
+
+// 게시글 상태 체크
+async function selectBoardStatus(connection, boardIdx) {
+  const selectBoardStatusQuery = `
+                        SELECT title, userIdx, status
+                        FROM Board
+                        WHERE boardIdx = ?;
+                  `;
+  const selectBoardStatusRow = await connection.query(selectBoardStatusQuery, boardIdx);
+  return selectBoardStatusRow[0];
+}
+
+// 퀴즈 신고하기
+async function createReportQuiz(connection, content, userIdx, boardIdx, quizIdx) {
+  const createReportQuizQuery = `
+      INSERT INTO Report(content, userIdx, boardIdx, quizIdx)
+      VALUES (?, ?, ?, ?);
+  `;
+  const [createReportQuizRows] = await connection.query(createReportQuizQuery, [content, userIdx, boardIdx, quizIdx]);
+  return createReportQuizRows;
+}
+
+// 퀴즈 신고 3회 이상이면 비활성화 설정
+async function updateQuizByReport(connection, boardIdx, quizIdx) {
+  const updateQuizByReportQuery = `
+            UPDATE Quiz a
+            LEFT JOIN Report b ON a.quizIdx = b.quizIdx
+            SET a.status = 'INACTIVE'
+            WHERE a.boardIdx = ? AND a.quizIdx = ? AND (SELECT COUNT(*) FROM Report WHERE commentIdx = null GROUP BY quizIdx) > 3;
+  `;
+  const [updateQuizByReportRows] = await connection.query(updateQuizByReportQuery, [boardIdx, quizIdx]);
+  return updateQuizByReportRows;
+}
+
+// 자기가 신고했던 퀴즈 조회
+async function selectQuizAfterReport(connection, userIdx, boardIdx, quizIdx) {
+  const selectQuizAfterReportQuery = `
+                        SELECT reportIdx, content
+                        FROM Report
+                        WHERE userIdx = ? AND boardIdx = ? AND quizIdx = ?;
+                  `;
+  const selectQuizAfterReportRow = await connection.query(selectQuizAfterReportQuery, [userIdx, boardIdx, quizIdx]);
+  return selectQuizAfterReportRow;
+}
+
+// 퀴즈 상태 체크
+async function selectQuizStatus(connection, quizIdx) {
+  const selectQuizStatusQuery = `
+                        SELECT question, quizType, boardIdx, status
+                        FROM Quiz
+                        WHERE quizIdx = ?;
+                  `;
+  const selectQuizStatusRow = await connection.query(selectQuizStatusQuery, quizIdx);
+  return selectQuizStatusRow[0];
+}
 
 
 module.exports = { 
@@ -403,5 +491,14 @@ module.exports = {
   selectWrongAnswerByDate,
   selectWrongAnswerWholeQuiz,
   selectWrongAnswerElementQuiz,
-  selectWrongAnswerContents
+  selectWrongAnswerContents,
+  createReportBoard,
+  updateBoardByReport,
+  selectUserIdxByBoardIdx,
+  selectBoardAfterReport,
+  selectBoardStatus,
+  createReportQuiz,
+  updateQuizByReport,
+  selectQuizAfterReport,
+  selectQuizStatus
   };

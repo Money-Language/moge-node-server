@@ -200,3 +200,61 @@ exports.removeWrongAnswer = async ( userIdx, quizIdx ) => {
         connection.release();
     }
 }
+
+
+// 게시글 신고하기
+exports.createReportBoard = async ( content, userIdx, boardIdx ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        const boardInfoRows = await boardProvider.boardCheck(boardIdx);
+        const boardInfoResult = await Promise.all(boardInfoRows.map(async(val) => val.status))
+
+        if (boardInfoResult == 'INACTIVE') {
+            return res.send(errResponse(baseResponse.BOARD_ALREADY_INACTIVE));
+        } else if (boardInfoResult == 'DELETE') {
+            return res.send(errResponse(baseResponse.BOARD_ALREADY_DELETE));
+        } else {
+            await connection.beginTransaction();
+            const createReportBoardResponse = await boardDao.createReportBoard(connection, content, userIdx, boardIdx);
+            const updateBoardByReportResult = await boardDao.updateBoardByReport(connection, boardIdx);
+            const result = { content, userIdx, boardIdx }
+            await connection.commit();
+            return response(baseResponse.SUCCESS, result)
+        }
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - createReportBoard Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+
+// 퀴즈 신고하기
+exports.createReportQuiz = async ( content, userIdx, boardIdx, quizIdx ) => {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        const quizInfoRows = await boardProvider.quizCheck(quizIdx);
+        const quizInfoResult = await Promise.all(quizInfoRows.map(async(val) => val.status))
+
+        if (quizInfoResult == 'INACTIVE') {
+            return res.send(errResponse(baseResponse.QUIZ_ALREADY_INACTIVE));
+        } else if (quizInfoResult == 'DELETE') {
+            return res.send(errResponse(baseResponse.QUIZ_ALREADY_DELETE));
+        } else {
+            await connection.beginTransaction();
+            const createReportQuizResponse = await boardDao.createReportQuiz(connection, content, userIdx, boardIdx, quizIdx);
+            const updateQuizByReportResult = await boardDao.updateQuizByReport(connection, boardIdx, quizIdx)
+            const result = { content, userIdx, boardIdx, quizIdx }
+            await connection.commit();
+            return response(baseResponse.SUCCESS, result)
+        }
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - createReportQuiz Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
