@@ -580,3 +580,25 @@ exports.postReportQuiz = async function (req, res) {
         }
     }
 }
+
+
+/**
+ * API No. 22
+ * API Name : 오늘의 퀴즈 문제 조회 API
+ * [GET] /app/users/{userIdx}/daily-quiz
+ */
+exports.getDailyQuiz = async function (req, res) {
+    /**
+     * Path Parameter : userIdx
+     */
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        const dailyQuizResult = await boardProvider.viewDailyQuiz(userIdx);
+        return res.send(response(baseResponse.SUCCESS, dailyQuizResult[0]));
+    }
+};

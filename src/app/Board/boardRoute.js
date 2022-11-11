@@ -52,5 +52,8 @@ module.exports = function(app){
 
     // 21. 퀴즈 신고하기
     app.post('/app/boards/:boardIdx/quiz/:quizIdx/report', jwtMiddleware, board.postReportQuiz);
+
+    // 22. 오늘의 퀴즈 문제 조회
+    app.get('/app/users/:userIdx/daily-quiz', jwtMiddleware, board.getDailyQuiz);
 };
 

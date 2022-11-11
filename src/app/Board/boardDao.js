@@ -529,6 +529,21 @@ async function selectQuizStatus(connection, quizIdx) {
   return selectQuizStatusRow[0];
 }
 
+// 오늘의 퀴즈 문제 조회
+async function selectDailyQuiz(connection, userIdx) {
+  const selectDailyQuizQuery = `
+                        SELECT a.quizIdx, a.quizType, a.question, a.boardIdx
+                        FROM Quiz a
+                        LEFT JOIN Board b ON a.boardIdx = b.boardIdx
+                        WHERE a.status = 'ACTIVE' AND b.userIdx NOT LIKE CONCAT('%', ?, '%')
+                        ORDER BY RAND()
+                        LIMIT 1;
+                  `;
+  const selectDailyQuizRow = await connection.query(selectDailyQuizQuery, userIdx);
+  return selectDailyQuizRow;
+}
+
+
 
 module.exports = { 
   selectUserFeed,
@@ -569,5 +584,6 @@ module.exports = {
   createReportQuiz,
   updateQuizByReport,
   selectQuizAfterReport,
-  selectQuizStatus
+  selectQuizStatus,
+  selectDailyQuiz
   };

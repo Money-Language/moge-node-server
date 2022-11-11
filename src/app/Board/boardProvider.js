@@ -236,3 +236,11 @@ exports.quizCheck = async function (quizIdx) {
     connection.release();
     return quizStatusResult;
 };
+
+// 오늘의 퀴즈 조회
+exports.viewDailyQuiz = async function (userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const dailyQuizResult = await boardDao.selectDailyQuiz(connection, userIdx);
+    connection.release();
+    return dailyQuizResult;
+};
