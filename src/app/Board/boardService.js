@@ -80,6 +80,7 @@ exports.createQuiz = async ( question, quizType, boardIdx ) => {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
+        const selectQuizByBoardIdxResult = await boardDao.selectBoardQuiz(connection, boardIdx);
         const categoryIdxByBoardIdxResult = await boardDao.selectCategoryIdxByBoardIdx(connection, boardIdx);
         const categoryIdxValue = await Promise.all(categoryIdxByBoardIdxResult[0].map(async(val) => val.categoryIdx))
 
@@ -88,11 +89,15 @@ exports.createQuiz = async ( question, quizType, boardIdx ) => {
         } else if (categoryIdxValue == 2 && quizType == 2) {
             return res.send(errResponse(baseResponse.GRAMMERS_OBJECTIVE_ONLY));
         } else {
-            const createQuizResponse = await boardDao.createQuiz(connection, question, quizType, boardIdx);
-            const quizIdx = createQuizResponse.insertId;
-            const result = { question, quizType, boardIdx, quizIdx }
-            await connection.commit();
-            return response(baseResponse.SUCCESS, result)
+            if (selectQuizByBoardIdxResult.length > 15) {
+                return res.send(errResponse(baseResponse.QUIZ_NOT_OVER_FIFTEEN))
+            } else {
+                const createQuizResponse = await boardDao.createQuiz(connection, question, quizType, boardIdx);
+                const quizIdx = createQuizResponse.insertId;
+                const result = { question, quizType, boardIdx, quizIdx }
+                await connection.commit();
+                return response(baseResponse.SUCCESS, result)
+            }
         }
     } catch (err) {
         await connection.rollback();
