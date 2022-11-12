@@ -370,9 +370,9 @@ async function deleteWrongAnswer(connection, userIdx, quizIdx) {
 // 오답이 있는 날짜 조회
 async function selectWrongAnswerDate(connection, userIdx) {
   const selectWrongAnswerDateQuery = `
-                              SELECT DATE_FORMAT(createdAt, '%y.%m.%d') AS date
-                              FROM WrongAnswer
-                              WHERE userIdx = ? AND status = 'ACTIVE';
+                                SELECT DATE_FORMAT(createdAt, '%y.%m.%d') AS date
+                                FROM WrongAnswer
+                                WHERE userIdx = ? AND status = 'ACTIVE' AND DATE_FORMAT(createdAt, '%y.%m.%d') != DATE_FORMAT(NOW(), '%y.%m.%d');
                           `;
   const selectWrongAnswerDateRow = await connection.query(selectWrongAnswerDateQuery, userIdx);
   return selectWrongAnswerDateRow;
