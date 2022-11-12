@@ -90,6 +90,8 @@ module.exports = {
     QUIZ_ALREADY_INACTIVE : { "isSuccess": false, "code": 3015, "message": "3번 이상 신고 누적으로 비활성화된 퀴즈입니다." },
     QUIZ_ALREADY_DELETE : { "isSuccess": false, "code": 3016, "message": "삭제된 퀴즈입니다." },
 
+    QUIZ_NOT_OVER_FIFTEEN : { "isSuccess": false, "code": 3017, "message": "퀴즈는 한 게시글 당 최대 15개까지 등록이 가능합니다." },
+
 
 
     //Connection, Transaction 등의 서버 오류
