@@ -399,6 +399,10 @@ exports.postWrongAnswer = async function (req, res) {
     const userIdx = req.params.userIdx;
     const userIdFromJWT = req.verifiedToken.userIdx;
     const { categoryIdx, boardIdx, quizIdx } = req.body;
+    const userIdxByBoardIdxResult = await boardProvider.viewUserIdxByBoardIdx(boardIdx);
+    const userIdxByQuizIdxResult = await boardProvider.viewUserIdxByQuizIdx(quizIdx);
+    const userIdxByBoardIdxList = await Promise.all(userIdxByBoardIdxResult[0].map(async(val) => val.userIdx))
+    const userIdxByQuizIdxList = await Promise.all(userIdxByQuizIdxResult[0].map(async(val) => val.userIdx))
 
     if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
     if (userIdFromJWT != userIdx) {
@@ -408,8 +412,16 @@ exports.postWrongAnswer = async function (req, res) {
         if (!boardIdx) return res.send(errResponse(baseResponse.BOARD_BOARDIDX_EMPTY));
         if (!quizIdx) return res.send(errResponse(baseResponse.BOARD_QUIZIDX_NOT_EXIST));
 
-        const wrongAnswerResponse = await boardService.stackWrongAnswer( userIdx, categoryIdx, boardIdx, quizIdx );
-        return res.send(wrongAnswerResponse)
+        if (userIdx == userIdxByBoardIdxList) {
+            return res.send(errResponse(baseResponse.REVIEW_BOARD_WRITER_SAME));
+        } else {
+            if (userIdx == userIdxByQuizIdxList) {
+                return res.send(errResponse(baseResponse.REVIEW_QUIZ_WRITER_SAME));
+            } else {
+                const wrongAnswerResponse = await boardService.stackWrongAnswer( userIdx, categoryIdx, boardIdx, quizIdx );
+                return res.send(wrongAnswerResponse)
+            }
+        }
     }
 }
 
@@ -602,3 +614,23 @@ exports.getDailyQuiz = async function (req, res) {
         return res.send(response(baseResponse.SUCCESS, dailyQuizResult[0]));
     }
 };
+
+
+/**
+ * API No. 23
+ * API Name : 오답 문제 풀이 완료시 포인트 획득 API
+ * [POST] /app/users/{userIdx}/review-points
+ */
+exports.increaseReviewPoint = async function (req, res) {
+
+    const userIdx = req.params.userIdx;
+    const userIdFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdx) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    if (userIdFromJWT != userIdx) {
+        return res.send(errResponse(baseResponse.USER_JWT_TOKEN_WRONG));
+    } else {
+        const updateUserPointAfterWrongResult = await boardService.updatePointAfterWrong(userIdx);
+        return res.send(updateUserPointAfterWrongResult)
+    }
+}

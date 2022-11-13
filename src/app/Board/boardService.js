@@ -54,6 +54,42 @@ exports.updateUserPoint = async function (quizIdx, userIdx) {
 }
 
 
+// 오답 문제 풀이 완료시 포인트 획득
+exports.updatePointAfterWrong = async function (userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    // 이용자가 오답복습 중 정답을 맞춘 날짜 조회하기
+    const viewCorrectReviewDateResult = await boardDao.selectCorrectReviewDate(connection, userIdx);
+    const correctReviewDateResultList = await Promise.all(viewCorrectReviewDateResult[0].map(async(val) => val.correctDate))
+    // JavaScript에서 사용자의 현재 날짜 가져오기
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = ('0' + (today.getMonth() + 1)).slice(-2);
+    const day = ('0' + today.getDate()).slice(-2);
+    const dateString = year + '-' + month  + '-' + day;
+    try {
+        if (correctReviewDateResultList.includes(dateString)) {
+            // 오답복습 데이터 중에 오늘 틀린 오답이 존재할 때
+            await connection.beginTransaction();
+            const updatePointAfterWrongTodayResult = await boardDao.userPointWrongAnswerToday(connection, userIdx, userIdx, userIdx, userIdx, userIdx)
+            await connection.commit();
+            return response(baseResponse.SUCCESS, updatePointAfterWrongTodayResult);
+        } else {
+           // 오답복습 데이터 중에 오늘 틀린 오답이 없을 때
+            await connection.beginTransaction();
+            const updatePointAfterWrongResult = await boardDao.userPointWrongAnswer(connection, userIdx, userIdx, userIdx)
+            await connection.commit();
+            return response(baseResponse.SUCCESS, updatePointAfterWrongResult);
+        }
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - updatePointAfterWrong Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+
 // 게시글 등록
 exports.createBoard = async ( userIdx, categoryIdx, title ) => {
     const connection = await pool.getConnection(async (conn) => conn);

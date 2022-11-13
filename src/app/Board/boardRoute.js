@@ -55,5 +55,9 @@ module.exports = function(app){
 
     // 22. 오늘의 퀴즈 문제 조회
     app.get('/app/users/:userIdx/daily-quiz', jwtMiddleware, board.getDailyQuiz);
+
+    // 23. 오답 문제 풀이 완료시 포인트 획득
+    app.post('/app/users/:userIdx/review-points', jwtMiddleware, board.increaseReviewPoint);
+
 };
 

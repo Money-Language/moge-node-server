@@ -543,6 +543,46 @@ async function selectDailyQuiz(connection, userIdx) {
   return selectDailyQuizRow;
 }
 
+// 오답 문제 풀이 완료시 포인트 획득
+async function userPointWrongAnswer(connection, userIdx, userIdx, userIdx) {
+  const userPointWrongAnswerQuery = `
+                UPDATE User a
+                LEFT JOIN WrongAnswer b ON a.userIdx = b.userIdx
+                SET a.userPoint = a.userPoint + 10
+                WHERE ( select count(*) from WrongAnswer where userIdx = ? and status = 'DELETE' group by status )
+                    = ( select count(*) from WrongAnswer where userIdx = ? group by userIdx ) AND b.userIdx = ?;
+          `;
+  const userPointWrongAnswerRow = await connection.query(userPointWrongAnswerQuery, [userIdx, userIdx, userIdx]);
+  return userPointWrongAnswerRow;
+}
+
+// 오답 문제 풀이 완료시 포인트 획득 (오늘 틀린 오답은 제외)
+async function userPointWrongAnswerToday(connection, userIdx, userIdx, userIdx, userIdx, userIdx) {
+  const userPointWrongAnswerTodayQuery = `
+                UPDATE User a
+                LEFT JOIN WrongAnswer b ON a.userIdx = b.userIdx
+                SET a.userPoint = a.userPoint + 10
+                WHERE ( select count(*) from WrongAnswer where userIdx = ? and status = 'DELETE' group by status )
+                    - ( select count(*) from WrongAnswer where userIdx = ? and status = 'DELETE' and DATE_FORMAT(createdAt, '%Y-%m-%d') = CURDATE() group by status )
+                    = ( select count(*) from WrongAnswer where userIdx = ? group by userIdx )
+                    - ( select count(*) from WrongAnswer where userIdx = ? and DATE_FORMAT(createdAt, '%Y-%m-%d') = CURDATE() group by userIdx )
+                        AND b.userIdx = ?;
+          `;
+  const userPointWrongAnswerTodayRow = await connection.query(userPointWrongAnswerTodayQuery, [userIdx, userIdx, userIdx, userIdx, userIdx]);
+  return userPointWrongAnswerTodayRow;
+}
+
+// 정답을 맞춘 날짜 조회
+async function selectCorrectReviewDate(connection, userIdx) {
+  const selectCorrectReviewDateQuery = `
+                              SELECT DATE_FORMAT(createdAt, '%Y-%m-%d') as correctDate
+                              FROM WrongAnswer
+                              WHERE userIdx = ? AND status = 'DELETE';
+                      `;
+  const selectCorrectReviewDateRow = await connection.query(selectCorrectReviewDateQuery, userIdx);
+  return selectCorrectReviewDateRow;
+}
+
 
 
 module.exports = { 
@@ -585,5 +625,8 @@ module.exports = {
   updateQuizByReport,
   selectQuizAfterReport,
   selectQuizStatus,
-  selectDailyQuiz
+  selectDailyQuiz,
+  userPointWrongAnswer,
+  userPointWrongAnswerToday,
+  selectCorrectReviewDate
   };
