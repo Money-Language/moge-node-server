@@ -69,6 +69,9 @@ module.exports = {
     REPORT_QUIZ_WRITER_SAME : { "isSuccess": false, "code": 2045, "message": "자기가 쓴 퀴즈를 자기가 신고할 수 없습니다." },
     REPORT_QUIZ_NOT_OVER_TWICE_SAME : { "isSuccess": false, "code": 2046, "message": "같은 퀴즈를 두 번 이상 신고할 수 없습니다." },
 
+    REVIEW_BOARD_WRITER_SAME : { "isSuccess": false, "code": 2047, "message": "자신이 작성했던 게시글은 오답 복습 목록에 등록할 수 없습니다." },
+    REVIEW_QUIZ_WRITER_SAME : { "isSuccess": false, "code": 2048, "message": "자신이 작성했던 퀴즈는 오답 복습 목록에 등록할 수 없습니다." },
+
 
 
     // Response error
