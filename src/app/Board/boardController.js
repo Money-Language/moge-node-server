@@ -120,21 +120,14 @@ exports.getCategoryTitleBycategoryIdx = async function (req, res) {
      * Path Parameter : categoryIdx
      */
     const categoryIdx = req.params.categoryIdx;
-    const boardResult = await boardProvider.viewBoard();
     const categoryResult = await boardProvider.viewCategory();
-    const boardCategoryIdxList = await Promise.all(boardResult.map(async(val) => val.categoryIdx))
     const categoryIdxList = await Promise.all(categoryResult.map(async(val) => val.categoryIdx))
 
     if (!categoryIdxList.includes(parseInt(categoryIdx))) {
         return res.send(errResponse(baseResponse.CATEGORY_CATEGORY_IDX_NOT_EXIST));
     } else {
-        if (!boardCategoryIdxList.includes(parseInt(categoryIdx))) {
-            return res.send(errResponse(baseResponse.CATEGORY_LIST_EMPTY));
-        }
-        else {
-            const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
-            return res.send(response(baseResponse.SUCCESS, categoryTitleResult[0]));
-        }
+        const categoryTitleResult = await boardProvider.viewCategoryTitle(categoryIdx);
+        return res.send(response(baseResponse.SUCCESS, categoryTitleResult[0]));
     }
 };
 
